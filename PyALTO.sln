@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PyALTO", "PyALTO\PyALTO.pyproj", "{808D42FC-A949-4ECD-9BA2-157225F5CDD2}"
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PyALTO-node", "PyALTO-node\PyALTO-node.pyproj", "{03196F55-7785-4746-A177-E2A5635F6748}"
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PyALTO-server", "PyALTO-server\PyALTO-server.pyproj", "{57E4630E-8204-49C3-86FE-146FC4507B44}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,8 +13,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{808D42FC-A949-4ECD-9BA2-157225F5CDD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{808D42FC-A949-4ECD-9BA2-157225F5CDD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03196F55-7785-4746-A177-E2A5635F6748}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03196F55-7785-4746-A177-E2A5635F6748}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57E4630E-8204-49C3-86FE-146FC4507B44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57E4630E-8204-49C3-86FE-146FC4507B44}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
