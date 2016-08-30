@@ -1,4 +1,5 @@
-from struct import unpack
+from struct import unpack, pack
+
 
 class Framer(object):
     """description of class"""
@@ -7,6 +8,16 @@ class Framer(object):
         self._data_len = 0
         self._data_buf = bytearray()
         self._data_callback = callback
+
+    def Frame(self, data_bytes):
+        """Frames given byte array to frame format"""
+        data_len = len(data_bytes)
+
+        frame = bytearray(data_len + 4)
+        frame[0:] = pack('>I', len(data_bytes))
+        frame[4:] = data_bytes
+
+        return frame
 
     def DataReceived(self, data):
         """Called upon reception of new data from the socket"""
