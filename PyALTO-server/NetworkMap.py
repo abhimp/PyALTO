@@ -15,19 +15,30 @@ class NetworkMap(object):
         """Create in-memory representation of our network"""
         self._build_static_topology()
 
-    def get_map_meta(self):
+    def get_map_vtag(self):
         """Return the version of the map"""
 
-        v = {}
-        v['vtag'] = {}
-        v['vtag']['resource-id'] = "default-static-network-map"
-        v['vtag']['tag'] = "1"
+        v = {
+            'resource-id': "default-static-network-map",
+            'tag' : "1"
+        }
 
         return v
 
     def get_network_pids(self):
         """Build the list of all network PIDs"""
         return self._pids
+
+    def get_numerical_routingcost(self):
+        return self._pid_routing_cost
+
+    def _get_pid_by_name(self, pid_name):
+        """Return PID object by given name"""
+        for p in self._pids:
+            if p.name == pid_name:
+                return p
+
+        return None
        
     def _build_static_topology(self):
         """Build the hardcoded topology.
@@ -65,3 +76,21 @@ class NetworkMap(object):
         self._pids.append(AltoPID(
             "pid-isp0",
             [ipaddress.IPv4Network("10.0.0.0/8")]))
+
+        # As number of router hops between the PIDS
+        self._pid_routing_cost = {}
+        self._pid_routing_cost[self._get_pid_by_name("pid-access0")] = {
+            self._get_pid_by_name("pid-access0"): 1,
+            self._get_pid_by_name("pid-access1"): 2,
+            self._get_pid_by_name("pid-datacenter0"): 2 
+            }
+        self._pid_routing_cost[self._get_pid_by_name("pid-access1")] = {
+            self._get_pid_by_name("pid-access0"): 1,
+            self._get_pid_by_name("pid-access1"): 2,
+            self._get_pid_by_name("pid-datacenter0"): 2 
+            }
+        self._pid_routing_cost[self._get_pid_by_name("pid-datacenter0")] = {
+            self._get_pid_by_name("pid-access0"): 2,
+            self._get_pid_by_name("pid-access1"): 2,
+            self._get_pid_by_name("pid-datacenter0"): 1 
+            }
