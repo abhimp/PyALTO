@@ -51,6 +51,11 @@ class AltoService(object):
         vtag = self._ms.get_map_vtag()
         nr = self._ms.get_numerical_routingcost()
 
+        # costmap type
+        cmt = {
+            "cost-mode": mode,
+            "cost-metric": metric}
+
         # Transform into ALTO notation from Objects
         nrep = {}
         for pid_from, costs in nr.items():
@@ -62,9 +67,7 @@ class AltoService(object):
         # Build the response
         cm = {"meta" : {
                 "dependent-vtags" : [vtag]},
-              "cost-type": {
-                  "cost-mode": "numerical",
-                  "cost-metric": "routingcost"},
+              "cost-type": cmt,
               "cost-map": nrep}
         return cm
 
