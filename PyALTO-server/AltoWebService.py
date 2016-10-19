@@ -37,4 +37,4 @@ class AltoWebService(object):
 
     def run(self):
         """Run the web service"""
-        self._alto_ws.run()
+        self._alto_ws.run(host="0.0.0.0")
