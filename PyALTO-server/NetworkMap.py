@@ -49,12 +49,12 @@ class NetworkMap(object):
         # We need Multi (one edge for each direction), Directed (flows in and out), Graph
         self._network_graph = nx.MultiDiGraph()
 
-        dslam_list = ["adslam0", "adslam1", "adslam2", "adslam3"]
-        access_routers_list = ["access0", "access1"]
+        dslam_list = ["adslam0", "adslam1", "adslam2", "adslam3", "adslam4", "adslam5", "adslam6", "adslam7"]
+        access_routers_list = ["access0", "access1", "access2", "access3"]
         core_routers_list = ["core0", "core1"]
         home_nodes_list = []
 
-        for i in range(0, 24):
+        for i in range(0, 48):
             home_nodes_list.append("home"+str(i))
 
         self._network_graph.add_nodes_from(dslam_list)
@@ -71,26 +71,52 @@ class NetworkMap(object):
             "pid-access1", 
             [ipaddress.IPv4Network("10.0.0.64/26")]))
         self._pids.append(AltoPID(
+            "pid-access2", 
+            [ipaddress.IPv4Network("10.0.0.128/26")]))
+        self._pids.append(AltoPID(
+            "pid-access3", 
+            [ipaddress.IPv4Network("10.0.0.192/26")]))
+        self._pids.append(AltoPID(
             "pid-datacenter0",
             [ipaddress.IPv4Network("10.0.102.0/24")]))
-        self._pids.append(AltoPID(
-            "pid-isp0",
-            [ipaddress.IPv4Network("10.0.0.0/8")]))
+        #self._pids.append(AltoPID(
+        #    "pid-isp0",
+        #    [ipaddress.IPv4Network("10.0.0.0/8")]))
 
         # As number of router hops between the PIDS
         self._pid_routing_cost = {}
         self._pid_routing_cost[self._get_pid_by_name("pid-access0")] = {
             self._get_pid_by_name("pid-access0"): 1,
             self._get_pid_by_name("pid-access1"): 2,
+            self._get_pid_by_name("pid-access2"): 3,
+            self._get_pid_by_name("pid-access3"): 3,
             self._get_pid_by_name("pid-datacenter0"): 2 
             }
         self._pid_routing_cost[self._get_pid_by_name("pid-access1")] = {
-            self._get_pid_by_name("pid-access0"): 1,
+            self._get_pid_by_name("pid-access0"): 2,
+            self._get_pid_by_name("pid-access1"): 1,
+            self._get_pid_by_name("pid-access2"): 3,
+            self._get_pid_by_name("pid-access3"): 3,
+            self._get_pid_by_name("pid-datacenter0"): 2 
+            }
+        self._pid_routing_cost[self._get_pid_by_name("pid-access2")] = {
+            self._get_pid_by_name("pid-access0"): 3,
             self._get_pid_by_name("pid-access1"): 2,
+            self._get_pid_by_name("pid-access2"): 1,
+            self._get_pid_by_name("pid-access3"): 2,
+            self._get_pid_by_name("pid-datacenter0"): 2 
+            }
+        self._pid_routing_cost[self._get_pid_by_name("pid-access3")] = {
+            self._get_pid_by_name("pid-access0"): 3,
+            self._get_pid_by_name("pid-access1"): 3,
+            self._get_pid_by_name("pid-access2"): 2,
+            self._get_pid_by_name("pid-access3"): 1,
             self._get_pid_by_name("pid-datacenter0"): 2 
             }
         self._pid_routing_cost[self._get_pid_by_name("pid-datacenter0")] = {
             self._get_pid_by_name("pid-access0"): 2,
             self._get_pid_by_name("pid-access1"): 2,
+            self._get_pid_by_name("pid-access2"): 2,
+            self._get_pid_by_name("pid-access3"): 2,
             self._get_pid_by_name("pid-datacenter0"): 1 
             }
