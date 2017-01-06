@@ -3,70 +3,16 @@ import asyncio
 import os
 import ipaddress
 import binascii
-import socket
 import sys
-import getopt
 import json
 import datetime
+import ptvsd
+import argparse
 
-from Framer import Framer
+import NetStatsCollector
 
-class CollectorClientProto(asyncio.Protocol):
-    """Asyncio client protocol implementation"""
-    def __init__(self):
-        self._transport = None
-        self._framer = Framer(self.OnData)
-        self._loop = asyncio.get_event_loop()
-        self._refresh_hdl = None
-        return
-
-    def connection_made(self, transport):
-        logging.info("Connection to ALTO server established")
-        self._transport = transport
-        self.RegisterWithServer()
-        return
-
-    def connection_lost(self, exc):
-        logging.warn("Connection to ALTO server lost: {0}"
-                     .format(exc))
-        return
-
-    def data_received(self, data):
-        self._framer.DataReceived(data)
-        return
-
-    def CloseConnection(self):
-        self._transport.close()
-        self._transport = None
-        return
-
-    def SendData(self, data):
-        obj_bytes = json.dumps(data).encode()
-        self._transport.write(self._framer.Frame(data)) 
-
-    def OnData(self, data):
-        data_obj = json.loads(data.decode())
-        return
-
-    def RegisterWithServer(self):
-    
-        self._rt = GetRoutingTable()
-        self._interfaces = set([x['iface'] for x in rt])
-        ifs_stats = GetIfaceStats(self._interfaces)
-        ts = int(time.time()) 
-
-        data = {}
-        data['type'] = 'register'
-        data['rtable'] = self._rt
-        data['stats'] = ifs_stats
-        data['timestamp'] = ts
-
-        SendData(data)
-
-        logging.info("Sent ALTO registration message")
-
-        return
-
+# Enable remote execution from the Visual Studio
+ptvsd.enable_attach(secret='alto')
 
 # Create a TCP connection to the ALTO server
 def GetIfaceStats(ifaces):
@@ -156,31 +102,15 @@ def main(argv):
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
     logging.info("PyALTO NODE is starting")
 
-    # Get the routing table
-    #rt = GetRoutingTable()
-    # Get unique interfaces
-    #ifs = set([x['iface'] for x in rt])
-    # Get interface stats
-    #ifs_stats = GetIfaceStats(ifs)
-    alto_ip = ''
+    if sys.platform != 'linux' and sys.platform != 'linux2':
+        logging.error('Collector supports Linux only!')
+        return
 
-    try:
-        opts, args = getopt.getopt(argv, "s", ["server="])
-    except getopt.GetoptError:
-        logging.critical("Error parsing cmd line arguments")
-        sys.exit(1)
+    nsc = NetStatsCollector.NetStatsCollector()
 
-    for opt, arg in opts:
-        if opt in ('-s', '--server'):
-            alto_ip = arg
-
-    logging.info("Connecting to ALTO server at {0}".format(alto_ip))
-
-    # Event loop
+    ## Event loop
     loop = asyncio.get_event_loop()
     loop.set_debug(True)
-    coro = loop.create_connection(CollectorClientProtocol, alto_ip, 6776)
-    transport, server = loop.run_until_complete(coro)
 
     try:
         loop.run_forever()
@@ -188,8 +118,16 @@ def main(argv):
         pass
 
     # If we are asked to close - close the connection and end the loop
-    server.CloseConnection()
     loop.close()
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    # Parse the command line arguments
+    parser = argparse.ArgumentParser(description='ALTO Virtual Net device stats collector')
+
+    parser.add_argument('--alto-server', help='IP Address of the ALTO server', nargs='?', default='192.168.100.100')
+    parser.add_argument('--dev-type', help='Type of Virtual device (switch/router)', nargs='?', default='router')
+    
+    args = parser.parse_args()
+    
+    # Start the collector
+    main(args)

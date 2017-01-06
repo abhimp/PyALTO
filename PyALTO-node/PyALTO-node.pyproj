@@ -22,7 +22,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Framer.py">
+    <Compile Include="NetStatsCollector.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PyALTO_node.py" />
