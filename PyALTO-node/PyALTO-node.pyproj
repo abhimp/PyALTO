@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>03196f55-7785-4746-a177-e2a5635f6748</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>PyALTO_node.py</StartupFile>
+    <StartupFile>pyalto_node.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,10 +22,10 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="NetStatsCollector.py">
+    <Compile Include="nethelpers.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="PyALTO_node.py" />
+    <Compile Include="pyalto_node.py" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
