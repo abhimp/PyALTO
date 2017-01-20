@@ -68,9 +68,9 @@ if __name__ == "__main__":
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description='ALTO Virtual Net device stats collector')
 
-    parser.add_argument('--alto-server', help='IP Address of the ALTO server', nargs='?', default='127.0.0.1')
-    parser.add_argument('--dev-type', help='Type of the virtual device (switch/router)', nargs='?', default='router')
-    parser.add_argument('--collect-interval', help='Data collection frequency', nargs='?', default=15.0)
+    parser.add_argument('--alto-server', help='IP Address of the ALTO server', default='127.0.0.1')
+    parser.add_argument('--dev-type', help='Type of the virtual device (switch/router)', default='router')
+    parser.add_argument('--collect-interval', help='Data collection frequency', default=15.0)
     
     args = parser.parse_args()
     
