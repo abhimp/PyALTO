@@ -9,7 +9,7 @@ import logging
 import binascii
 import sys
     
-def get_routing_table(self):
+def get_routing_table():
     """Extract the node's routing table in usable format"""
         
     rt_entries = []
@@ -30,11 +30,11 @@ def get_routing_table(self):
                 break
             # Process entry lines
             else:
-                rt_entries.append(self._parse_rt_line(rt_line))
+                rt_entries.append(_parse_rt_line(rt_line))
 
     return rt_entries
 
-def _parse_rt_line(self, str_line):
+def _parse_rt_line(str_line):
     """Parse a str representing a single line in rt"""
 
     rt_line = {}
@@ -77,19 +77,19 @@ def _parse_rt_line(self, str_line):
 
     return rt_line
 
-def collect_all_interface_stats(self):
+def collect_all_interface_stats():
     """Collect and return stats of all interfaces"""
 
     # Get the list of active adapters
-    interfaces = self.get_net_adapter_names()
+    interfaces = get_net_adapter_names()
 
     # Get the adapter stats
-    interface_stats = [self._get_interface_stats(iname) for iname in interfaces]
+    interface_stats = [_get_interface_stats(iname) for iname in interfaces]
         
     return interface_stats
 
 
-def _get_interface_stats(self, interface_name):
+def _get_interface_stats(interface_name):
     """Collect and return stats of the given interface"""
                 
     # Holder of stat data
@@ -112,7 +112,7 @@ def _get_interface_stats(self, interface_name):
     # Return the collected data
     return stat_data
 
-def get_net_adapter_names(self):
+def get_net_adapter_names():
     """Get the names of network adapters"""
         
     # Iterate over adapter names and skip loopback

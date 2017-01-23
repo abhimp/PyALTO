@@ -2,12 +2,6 @@ import ipaddress
 
 import networkx as nx
 
-class AltoPID(object):
-    """Representation of the ALTO PID entry"""
-    def __init__(self, name, ip_prefixes):
-        self.name = name
-        self.ip_prefixes = ip_prefixes
-
 class NetworkMap(object):
     """Representation of the physical network"""
 

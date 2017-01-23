@@ -244,5 +244,7 @@ ModelManifest.xml
 # FAKE - F# Make
 .fake/
 
-PyALTO-server/__pycache__
-/PyALTO-node/__pycache__/*
+/PyALTO-node/__pycache__
+/PyALTO-server/altoserver/__pycache__
+/PyALTO-server/altoserver/alto/__pycache__
+/PyALTO-server/altoserver/upload/__pycache__

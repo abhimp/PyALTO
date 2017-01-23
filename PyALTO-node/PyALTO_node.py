@@ -40,16 +40,9 @@ def main(run_args):
 
 def report_stats(run_args):
     """Periodically report stats"""
-    #logging.info('Hostname: {}'.format(socket.gethostname()))
-    #logging.info('Adapters:')
-    #logging.info(nethelpers.get_net_adapter_names())
-    #logging.info('Stats:')
-    #logging.info(nethelpers.collect_all_interface_stats())
-    #logging.info('Rtable:')
-    #logging.info(nethelpers.get_routing_table())
 
     # Make base URL
-    server_url = run_args.alto_server + '/upload/' + socket.gethostname() + '/'
+    server_url = 'http://' + run_args.alto_server + '/upload/' + socket.gethostname() + '/'
 
     # POST adapeter counters
     adapter_stats = nethelpers.collect_all_interface_stats()

@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>57e4630e-8204-49c3-86fe-146fc4507b44</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>PyALTO_server.py</StartupFile>
+    <StartupFile>runserver.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,6 +22,21 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="altoserver\alto\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="altoserver\netnode.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="altoserver\networkmap.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="altoserver\upload\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="altoserver\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="AltoService.py">
       <SubType>Code</SubType>
     </Compile>
@@ -31,10 +46,14 @@
     <Compile Include="NetworkMap.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="PyALTO_server.py" />
-    <Compile Include="__init__.py">
+    <Compile Include="runserver.py">
       <SubType>Code</SubType>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="altoserver\" />
+    <Folder Include="altoserver\alto\" />
+    <Folder Include="altoserver\upload\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
