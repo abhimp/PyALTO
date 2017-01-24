@@ -22,6 +22,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="altoserver\alto\altoserver.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="altoserver\alto\__init__.py">
       <SubType>Code</SubType>
     </Compile>

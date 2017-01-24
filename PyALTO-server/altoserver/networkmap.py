@@ -83,6 +83,13 @@ class NetworkMap(object):
 
         return (meta, self._net_pids.values())
 
+    def get_map_tag(self):
+        """Get tag of a map"""
+        hasher = hashlib.sha256()
+        hasher.update(str(self._topo_version).encode('ascii'))
+
+        return hasher.hexdigest()
+
     def get_device(self, dev_name):
         """Get object representing device by name"""
 
@@ -102,7 +109,28 @@ class NetworkMap(object):
 
     def get_pid_from_ip(self, ip_address):
         """Get the PID value from the given IP address"""
-        pass
+        
+        # Build candidates
+        candidates = []
+        for pid in self._net_pids.values():
+            if ip_address.version == 4:
+                for prefix in pid.ipv4_prefixes:
+                    if ip_address in prefix:
+                        candidates.append((prefix, pid))
+            elif ip_address.version == 6:
+                for prefix in pid.ipv6_prefixes:
+                    if ip_address in prefix:
+                        candidates.append((prefix, pid))
+            else:
+                raise Exception('The future is here')
+
+        # Did we find anything?
+        if not any(candidates):
+            return None
+
+        # Return name of candidate with longest prefix
+        (prefix, pid) = min(candidates, key=lambda x: x[0].prefixlen)
+        return pid.name
 
 
 class AltoPID(object):

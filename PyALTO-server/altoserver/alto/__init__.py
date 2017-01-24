@@ -1,35 +1,32 @@
 """
-ALTO protocol implementation (RESTful API)
+ALTO protocol RESTful API.
+Functions here should be only a shim between Flask and ALTO
+implementation in AltoServer class
 """
 import json
 import logging
 
 from flask import Blueprint, Response, request, abort
 
-from altoserver.networkmap import AltoPID
-from altoserver import nm
+from altoserver.alto.altoserver import AltoServer
 
+alto_server = AltoServer()
 alto = Blueprint('alto', __name__)
 
 @alto.route('/networkmap')
 def get_network_map():
-    """Return ALTO network map per [RFC7285] p11.2.1""" 
+    """Get ALTO network map """ 
 
-    # Get internal network representation
-    (meta, map) = nm.get_pid_topology()
+    # TODO: Any request validity checking here
 
-    # Add pids
-    nmap = {}
-    for pid in map:
-        (name, data) = pid.get_json_repr()
-        nmap[name] = data
-    
-    # Build the response
-    resp = {
-        'meta': meta,
-        'network-map': nmap
-    }
-
+    # Get the map
+    try:
+        resp = alto_server.get_network_map()
+    except Exception as exc:
+        logging.exception('Exc in networkmap', exc_info = exc)
+        abort(500)
+        
+    # Return properly structured response
     return Response(
         json.dumps(resp),
         mimetype='application/alto-networkmap+json'
@@ -39,8 +36,7 @@ def get_network_map():
 def get_endpoint_properties():
     """Return endpoint properties [RFC7285] p 11.4.1"""
 
-    # Ignore requested properties
-    # The only mandatory requirement is PID lookup (p 11.4.1.4)
+    # Do any other request checks
 
     # Drop early if not json
     if not request.is_json:
@@ -48,17 +44,26 @@ def get_endpoint_properties():
 
     req_data = request.json
 
-    print(req_data)
+    # Ensure that required keys are there
+    if 'properties' not in req_data:
+        abort(400)
 
-    # Validate properties
+    if 'endpoints' not in req_data:
+        abort(400)
 
-    # Request data
+    # Request data. Do not try to parse requested
+    # data here. This is only a shim layer
+    try:
+        resp = alto_server.get_endpoint_properties(
+            req_data['properties'],
+            req_data['endpoints']
+        )
+    except Exception as exc:
+        logging.exception('Exc in endpoint properties', exc_info = exc)
+        abort(500)
 
-    # Format and return the response
-    response = {'status': 'OK'}
-
+    # Return if successfull
     return Response(
-        json.dumps(response),
+        json.dumps(resp),
         mimetype='application/alto-endpointprop+json'
     )
-                   
