@@ -43,15 +43,6 @@
     <Compile Include="altoserver\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="AltoService.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="AltoWebService.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="NetworkMap.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="runserver.py">
       <SubType>Code</SubType>
     </Compile>

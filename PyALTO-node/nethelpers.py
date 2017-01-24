@@ -9,10 +9,10 @@ import logging
 import binascii
 import sys
 import subprocess
-    
+
 def get_routing_table():
     """Extract the node's routing table in usable format"""
-        
+
     rt_entries = []
     first_line = True
 
@@ -86,13 +86,13 @@ def collect_all_interface_stats():
 
     # Get the adapter stats
     interface_stats = [_get_interface_stats(iname) for iname in interfaces]
-        
+
     return interface_stats
 
 
 def _get_interface_stats(interface_name):
     """Collect and return stats of the given interface"""
-                
+
     # Holder of stat data
     stat_data = {
         'name': interface_name,
@@ -103,7 +103,7 @@ def _get_interface_stats(interface_name):
     stat_dir = os.path.join(
         os.path.join('/sys/class/net/', interface_name),
         'statistics')
-                
+
     # Collect the statistical values
     for stat in os.listdir(stat_dir):
         stat_path = os.path.join(stat_dir, stat)
@@ -115,7 +115,7 @@ def _get_interface_stats(interface_name):
 
 def get_net_adapter_names():
     """Get the names of network adapters"""
-        
+
     # Iterate over adapter names and skip loopback
     sys_dir = '/sys/class/net'
     interface_names = [iname for iname in os.listdir(sys_dir) if iname != 'lo']
@@ -127,15 +127,15 @@ def get_quagga_rt():
 
     # Get Quagga RT
     with subprocess.Popen(
-            ['vtysh -c \"sh ip route\"'],
-            stdout=subprocess.PIPE,
-            shell=True,
-            universal_newlines=True) as p_vtysh:
-        
+        ['vtysh -c \"sh ip route\"'],
+        stdout=subprocess.PIPE,
+        shell=True,
+        universal_newlines=True) as p_vtysh:
+
         quagga_rt = p_vtysh.stdout.readlines()
 
     # Strip the newlines
-    lines = [line.replace('\n','') for line in quagga_rt]
+    lines = [line.replace('\n', '') for line in quagga_rt]
 
     # Return nothing if not enough lines
     if len(lines) < 5:
@@ -146,7 +146,7 @@ def get_quagga_rt():
 
 def _process_quagga_rt(in_lines):
     """Process quagga lines"""
-    
+
     # Format
     #{
     #    'protocol': '',
@@ -191,16 +191,10 @@ def _process_quagga_rt(in_lines):
             cached = False
 
         # Selected
-        if line[1] == '>':
-            selected = True
-        else:
-            selected = False
+        selected = bool(line[1] == '>')
 
         # FIB
-        if line[2] == '*':
-            fib = True
-        else:
-            fib = False
+        fib = bool(line[2] == '*')
 
         # Handle differently if Routing proto or Directly connected
         tokens = line.split(' ')
@@ -241,7 +235,7 @@ def _process_quagga_rt(in_lines):
                     break
                 else:
                     continue
-        
+
         out.append({
             'protocol': proto,
             'selected': selected,
