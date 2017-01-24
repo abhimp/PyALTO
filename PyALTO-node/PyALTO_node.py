@@ -53,6 +53,9 @@ def report_stats(run_args):
         rtable = nethelpers.get_routing_table()
         requests.post(server_url + 'rtable', json = rtable)
 
+        quagga_rt = nethelpers.get_quagga_rt()
+        requests.post(server_url + 'quagga_rt', json = quagga_rt)
+
     # Schedule next run
     loop = asyncio.get_event_loop()
     loop.call_later(run_args.collect_interval, report_stats, run_args)

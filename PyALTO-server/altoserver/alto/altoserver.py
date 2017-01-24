@@ -9,12 +9,18 @@ from altoserver import nm
 class AltoServer(object):
     """This class implementes functionality of the ALTO protocol"""
 
+    def __init__(self):
+        """Initialize the ALTO server"""
+
+        self._cost_providers = []
+        self._property_providers = []
+
     @staticmethod
     def parse_endpoints(in_endpoints):
         """Parse each endpoint to IPv4/v6 address.
            Supports IPv4 and IPv6 address types.        
         """
-
+        # TODO: Plugable parsers
         results = []
 
         # Iterate over all addresses
@@ -29,7 +35,7 @@ class AltoServer(object):
         # Return results
         return results
 
-    def get_network_map():
+    def get_network_map(self):
         """Return JSON serializable network map per [RFC7285] p11.2.1"""
     
         # Get internal network representation
@@ -97,3 +103,34 @@ class AltoServer(object):
         }
 
         return  resp
+
+    def get_endpoint_costs(self, cost_type, endpoints):
+        """Implement cost calculation service by given endpoints"""
+
+        # Get cost estimator based on cost type parameter
+        cost_estimator = self._get_cost_estimator(
+            cost_type['cost-mode'], 
+            cost_type['cost-metric']
+        )
+
+        # Get costs provided by cost estimator
+        cost_map = cost_estimator.get_cost(endpoints['srcs'], endpoints['dsts'])
+        
+        resp = {
+            'meta' : {
+                'cost-type' : cost_type
+            },
+            'endpoint-cost-map': cost_map
+        }
+
+        return repr
+
+    def _get_cost_estimator(self, cost_mode, cost_metric):
+        """Factory method to return registered cost estimator"""
+
+        for cost_provider in self._cost_providers:
+            if (cost_provider.cost_mode == cost_mode and
+                cost_provider.cost_metric == cost_metric):
+                return cost_provider
+
+        return None

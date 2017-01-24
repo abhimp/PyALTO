@@ -67,3 +67,57 @@ def get_endpoint_properties():
         json.dumps(resp),
         mimetype='application/alto-endpointprop+json'
     )
+
+@alto.route('/endpointcost/lookup', methods=['POST'])
+def get_endpoint_cost():
+    """Return endpoint costs [RFC7285] p 11.5.1"""
+    # Do any other request checks
+
+    # Drop early if not json
+    if not request.is_json:
+        abort(400)
+
+    req_data = request.json
+
+    # Ensure that required keys and data are there
+    if 'cost-type' not in req_data:
+        abort(400)
+
+    if 'cost-mode' not in req_data['cost-type']:
+        abort(400)
+
+    if 'cost-metric' not in req_data['cost-type']:
+        abort(400)
+
+    if 'endpoints' not in req_data:
+        abort(400)
+
+    if 'srcs' not in req_data['endpoints']:
+        abort(400)
+
+    if 'dsts' not in req_data['endpoints']:
+        abort(400)
+
+    if not any(req_data['endpoints']['srcs']):
+        abort(400)
+
+    if not any(req_data['endpoints']['dsts']):
+        abort(400)
+
+    # Request data. Do not try to parse requested
+    # data here. This is only a shim layer
+
+    try:
+        resp = alto_server.get_endpoint_costs(
+            req_data['cost-type'],
+            req_data['endpoints']
+        )
+    except Exception as exc:
+        logging.exception('Exc in endpoint costs', exc_info = exc)
+        abort(500)
+
+    # Return if successfull
+    return Response(
+        json.dumps(resp),
+        mimetype='application/alto-endpointcost+json'
+    )

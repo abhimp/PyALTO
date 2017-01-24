@@ -8,6 +8,7 @@ import ipaddress
 import logging
 import binascii
 import sys
+import subprocess
     
 def get_routing_table():
     """Extract the node's routing table in usable format"""
@@ -120,3 +121,134 @@ def get_net_adapter_names():
     interface_names = [iname for iname in os.listdir(sys_dir) if iname != 'lo']
 
     return interface_names
+
+def get_quagga_rt():
+    """Extract routing table as seen by Quagga"""
+
+    # Get Quagga RT
+    with subprocess.Popen(
+            ['vtysh -c \"sh ip route\"'],
+            stdout=subprocess.PIPE,
+            shell=True,
+            universal_newlines=True) as p_vtysh:
+        
+        quagga_rt = p_vtysh.stdout.readlines()
+
+    # Strip the newlines
+    lines = [line.replace('\n','') for line in quagga_rt]
+
+    # Return nothing if not enough lines
+    if len(lines) < 5:
+        return None
+
+    # Process Quagga lines
+    return _process_quagga_rt(lines)
+
+def _process_quagga_rt(in_lines):
+    """Process quagga lines"""
+    
+    # Format
+    #{
+    #    'protocol': '',
+    #    'selected': True|False,
+    #    'fib': True|False,
+    #    'subnet': '',
+    #    'AD': 0|None,
+    #    'RD': 0|None,
+    #    'GW': ipaddress|None,
+    #    'Int': ''
+    #}
+
+    out = []
+
+    # Some lines might refer to the previous line
+    # so we need to keep state
+    last_proto = None
+    last_subnet = None
+    last_ad = None
+    last_rd = None
+
+    # Process the output
+    for lineno, line in enumerate(lines):
+        # Skip headers
+        if lineno in [0, 1, 2, 3]:
+            continue
+
+        # Process the lines
+        # Type Code
+        if line[0] == ' ':
+            proto = last_proto
+        else:
+            proto = line[0]
+
+            # Code present, clear cache
+            last_proto = None
+            last_subnet = None
+            last_ad = None
+            last_rd = None
+
+        # Selected
+        if line[1] == '>':
+            selected = True
+        else:
+            selected = False
+
+        # FIB
+        if line[2] == '*':
+            fib = True
+        else:
+            fib = False
+
+        # Handle differently if Routing proto or Directly connected
+        tokens = line.split(' ')
+        if proto == 'C':
+            # Look for anchor 'is'. -1 is subnet, +3 is adapter
+            for num, token in enumerate(tokens):
+                if token == 'is':
+                    subnet = c_tokens[num-1]
+                    last_subnet = subnet
+                    adapter = c_tokens[num+3]
+                    ad = None
+                    rd = None
+                    gw = None
+                    break
+                else:
+                    continue
+        else:
+            # Look for anchor 'via'.
+            for num, token in enumerate(tokens):
+                if token == 'via':
+                    if proto == ' ':
+                        # Load cached
+                        subnet = last_subnet
+                        ad = last_ad
+                        rd = last_rd
+                    else:
+                        # Parse flieds before 'via'
+                        subnet = rp_tokens[num-2]
+                        last_subnet = subnet
+                        (ad, rd) = rp_tokens[num-1].strip('[]').split('/')
+                        ad = int(ad)
+                        rd = int(rd)
+                        last_ad = ad
+                        last_rd = rd
+
+                    gw = rp_tokens[num+1].strip(',')
+                    adapter = rp_tokens[num+2].strip(',')
+                    break
+                else:
+                    continue
+        
+        out.append({
+            'protocol': proto,
+            'selected': selected,
+            'fib': fib,
+            'subnet': subnet,
+            'AD': ad,
+            'RD': rd,
+            'GW': gw,
+            'Int': adapter
+        })
+
+    # Return data
+    return out
