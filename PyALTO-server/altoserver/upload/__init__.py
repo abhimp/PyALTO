@@ -50,7 +50,7 @@ def upload_device_routing_table(device_name):
     return 'Y'
 
 @netupload.route('/<device_name>/quagga_rt', methods=['GET', 'POST'])
-def upload_device_adapter_stats(device_name):
+def upload_quagga_routing_table(device_name):
     """Process the incomming request with quagga routing table"""
 
     # Process GET for easier debugging

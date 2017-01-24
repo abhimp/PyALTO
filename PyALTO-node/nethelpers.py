@@ -167,9 +167,10 @@ def _process_quagga_rt(in_lines):
     last_subnet = None
     last_ad = None
     last_rd = None
+    cached = False
 
     # Process the output
-    for lineno, line in enumerate(lines):
+    for lineno, line in enumerate(in_lines):
         # Skip headers
         if lineno in [0, 1, 2, 3]:
             continue
@@ -178,14 +179,16 @@ def _process_quagga_rt(in_lines):
         # Type Code
         if line[0] == ' ':
             proto = last_proto
+            cached = True
         else:
             proto = line[0]
 
             # Code present, clear cache
-            last_proto = None
+            last_proto = proto
             last_subnet = None
             last_ad = None
             last_rd = None
+            cached = False
 
         # Selected
         if line[1] == '>':
@@ -205,9 +208,9 @@ def _process_quagga_rt(in_lines):
             # Look for anchor 'is'. -1 is subnet, +3 is adapter
             for num, token in enumerate(tokens):
                 if token == 'is':
-                    subnet = c_tokens[num-1]
+                    subnet = tokens[num-1]
                     last_subnet = subnet
-                    adapter = c_tokens[num+3]
+                    adapter = tokens[num+3]
                     ad = None
                     rd = None
                     gw = None
@@ -218,23 +221,23 @@ def _process_quagga_rt(in_lines):
             # Look for anchor 'via'.
             for num, token in enumerate(tokens):
                 if token == 'via':
-                    if proto == ' ':
+                    if cached:
                         # Load cached
                         subnet = last_subnet
                         ad = last_ad
                         rd = last_rd
                     else:
                         # Parse flieds before 'via'
-                        subnet = rp_tokens[num-2]
+                        subnet = tokens[num-2]
                         last_subnet = subnet
-                        (ad, rd) = rp_tokens[num-1].strip('[]').split('/')
+                        (ad, rd) = tokens[num-1].strip('[]').split('/')
                         ad = int(ad)
                         rd = int(rd)
                         last_ad = ad
                         last_rd = rd
 
-                    gw = rp_tokens[num+1].strip(',')
-                    adapter = rp_tokens[num+2].strip(',')
+                    gw = tokens[num+1].strip(',')
+                    adapter = tokens[num+2].strip(',')
                     break
                 else:
                     continue
