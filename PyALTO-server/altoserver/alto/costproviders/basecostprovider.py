@@ -1,6 +1,7 @@
 """
 Base class that all cost estimators should extend
 """
+
 class BaseCostProvider(object):
     """Abstract class"""
 

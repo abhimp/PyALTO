@@ -22,10 +22,34 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="altoserver\alto\addresstypes\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="altoserver\alto\altoserver.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="altoserver\alto\basecostprovider.py">
+    <Compile Include="altoserver\alto\addresstypes\baseaddrtypeparser.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="altoserver\alto\costproviders\basecostprovider.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="altoserver\alto\addresstypes\ipaddrparser.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="altoserver\alto\costproviders\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="altoserver\alto\costproviders\ospfcostprovider.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="altoserver\alto\propertyproviders\basepropertyprovider.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="altoserver\alto\propertyproviders\pidpropertyprovider.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="altoserver\alto\propertyproviders\__init__.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="altoserver\alto\__init__.py">
@@ -50,6 +74,9 @@
   <ItemGroup>
     <Folder Include="altoserver\" />
     <Folder Include="altoserver\alto\" />
+    <Folder Include="altoserver\alto\addresstypes\" />
+    <Folder Include="altoserver\alto\costproviders\" />
+    <Folder Include="altoserver\alto\propertyproviders\" />
     <Folder Include="altoserver\upload\" />
   </ItemGroup>
   <PropertyGroup>

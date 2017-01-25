@@ -247,4 +247,7 @@ ModelManifest.xml
 /PyALTO-node/__pycache__
 /PyALTO-server/altoserver/__pycache__
 /PyALTO-server/altoserver/alto/__pycache__
+/PyALTO-server/altoserver/alto/addresstypes/__pycache__
+/PyALTO-server/altoserver/alto/costproviders/__pycache__
+/PyALTO-server/altoserver/alto/propertyproviders/__pycache__
 /PyALTO-server/altoserver/upload/__pycache__

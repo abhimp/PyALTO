@@ -2,6 +2,7 @@
 Implementation of ALTO protocol
 """
 import ipaddress
+import logging
 
 from altoserver.networkmap import AltoPID
 from altoserver import nm
@@ -14,23 +15,32 @@ class AltoServer(object):
 
         self._cost_providers = []
         self._property_providers = []
+        self._address_parsers = []
 
-    @staticmethod
-    def parse_endpoints(in_endpoints):
-        """Parse each endpoint to IPv4/v6 address.
-           Supports IPv4 and IPv6 address types.        
-        """
-        # TODO: Plugable parsers
+    def parse_endpoints(self, in_endpoints):
+        """Parse textual address representations to Python objects"""
+
+        assert any(in_endpoints)
+
         results = []
 
         # Iterate over all addresses
         for address in in_endpoints:
+
+            assert address.count(':') == 1
             (addr_type, addr) = address.split(':')
 
-            if addr_type.lower() == 'ipv4' or addr_type.lower() == 'ipv6':
-                results.append(ipaddress.ip_address(addr))
+            parser = self._get_address_parser(addr_type)
+            if parser is None:
+                logging.info('Did not find parser for type: {}'.format(addr_type))
+                continue
 
-            # Check for any other address type here
+            parsed_addr = parser.to_object(address)
+            if parsed_addr is None:
+                logging.info('Failed to parse address: {}'.format(address))
+                continue
+
+            results.append(parsed_addr)
 
         # Return results
         return results
@@ -60,49 +70,60 @@ class AltoServer(object):
         # IMHO no need to handle error cases, let exceptions
         # propagate and fail back to client
 
-        # TODO: Implement pluggable properties and endpoint parsers
-        # For now return PID only (p 11.4.1.4)
+        assert any(properties) and any(endpoints)
 
-        parsed_addr = AltoServer.parse_endpoints(endpoints)
+        # Parse addresses from 'type:addr' to Python objects
+        parsed_addr = self.parse_endpoints(endpoints)
 
         endp_props = {}
+        dependent_tags = []
         
-        # Iterate over addresses
+        # Iterate over addresses.
+        # For each address we have to get all properties
         for address in parsed_addr:
 
             props = {}
-
-            # TODO: Use factory pattern here
+            
             for property in properties:
-                if property == 'network-map.pid':
-                    pid = nm.get_pid_from_ip(address)
-                    if pid is not None:
-                        props['network-map.pid'] = pid
-                else:
-                    raise NotImplementedError('Unknown property: {}'.format(property))
-        
-            if address.version == 4:
-                addr_str = 'ipv4:' + str(address)
-            else:
-                addr_str = 'ipv6:' + str(address)
+                
+                provider = self._get_property_provider(property)
+                if provider is None:
+                    logging.info('No property provider for {} property'.format(property))
+                    continue
+                    
+                property_val = provider.get_property(address)
+                if property_val is None:
+                    logging.info('Property {} not processed for address: {}'
+                                 .format(property, str(address)))
+                    continue
 
-            endp_props[addr_str] = props
+                # Save values
+                (prop_value, dependency) = property_val
+                props[property] = prop_value
+                dependent_tags.append(dependency)
 
-        # Build and return response
-        # TODO: Dependent resources should be dynamic
+            # Link address to all properties if any
+            if any(props.keys()):
+                endp_props[address] = props
+
+        # Change from object to string
+        keys_copy = list(endp_props.keys())
+        for key in keys_copy:
+            parser = self._get_address_parser(key)
+            new_key = parser.from_object(key)
+            endp_props[new_key] = endp_props.pop(key)
+
+        # Ensure no duplicate dependent vtags
+        no_dupes  = [dict(t) for t in set([tuple(d.items()) for d in dependent_tags])]
+
         resp = {
             'meta' : {
-                'dependent-vtags': [
-                    { 
-                        'resource-id' : 'network-map',
-                        'tag' : nm.get_map_tag()
-                    }
-                ]
+                'dependent-vtags' : no_dupes
             },
             'endpoint-properties' : endp_props
         }
-
-        return  resp
+        
+        return resp
 
     def get_endpoint_costs(self, cost_type, endpoints):
         """Implement cost calculation service by given endpoints"""
@@ -125,6 +146,27 @@ class AltoServer(object):
 
         return repr
 
+    def register_address_parsers(self, addr_parsers):
+        """Register given parsers with the server"""
+        assert any(addr_parsers)
+
+        for parser in addr_parsers:
+            self._address_parsers.append(parser)
+
+    def register_property_providers(self, prop_provider):
+        """Register given property providers with the server"""
+        assert any(prop_provider)
+
+        for provider in prop_provider:
+            self._property_providers.append(provider)
+
+    def register_cost_providers(self, cost_providers):
+        """Register given cost providers with the ALTO server"""
+        assert any(cost_providers)
+
+        for provider in cost_providers:
+            self._cost_providers.append(provider)
+
     def _get_cost_estimator(self, cost_mode, cost_metric):
         """Factory method to return registered cost estimator"""
 
@@ -133,4 +175,30 @@ class AltoServer(object):
                 cost_provider.cost_metric == cost_metric):
                 return cost_provider
 
+        return None
+
+    def _get_property_provider(self, property_name):
+        """Factory method to return endpoint property provider"""
+
+        # Find provider for given property
+        for provider in self._property_providers:
+            if provider.property_name == property_name.lower():
+                return provider
+
+        # No providers found
+        return None
+
+    def _get_address_parser(self, address):
+        """Get address parser from address type"""
+
+        # Two ways lookup
+        if isinstance(address, str):
+            for parser in self._address_parsers:
+                if address in parser.identifiers:
+                    return parser
+        else:
+            for parser in self._address_parsers:
+                if type(address) in parser.types:
+                    return parser
+        # No parsers 
         return None

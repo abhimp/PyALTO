@@ -10,7 +10,15 @@ from flask import Blueprint, Response, request, abort
 
 from altoserver.alto.altoserver import AltoServer
 
+from altoserver.alto.addresstypes import *
+from altoserver.alto.costproviders import *
+from altoserver.alto.propertyproviders import *
+
 alto_server = AltoServer()
+alto_server.register_address_parsers([ipaddrparser.IPAddrParser()])
+alto_server.register_cost_providers([ospfcostprovider.OSPFCostProvider()])
+alto_server.register_property_providers([pidpropertyprovider.PIDPropertyProvider()])
+
 alto = Blueprint('alto', __name__)
 
 @alto.route('/networkmap')

@@ -73,15 +73,7 @@ class NetworkMap(object):
         hasher = hashlib.sha256()
         hasher.update(str(self._topo_version).encode('ascii'))
 
-        # TODO: Implement proper vtag calculation algo
-        meta = {
-            'vtag' : {
-                'resource-id' : 'network-map',
-                'tag' : hasher.hexdigest()
-            }
-        }
-
-        return (meta, self._net_pids.values())
+        return (self.get_map_meta(), self._net_pids.values())
 
     def get_map_tag(self):
         """Get tag of a map"""
@@ -89,6 +81,19 @@ class NetworkMap(object):
         hasher.update(str(self._topo_version).encode('ascii'))
 
         return hasher.hexdigest()
+
+    def get_map_meta(self):
+        """Get VTAG of the map"""
+
+        hasher = hashlib.sha256()
+        hasher.update(str(self._topo_version).encode('ascii'))
+
+        vtag = {
+            'tag': hasher.hexdigest(),
+            'resource-id': 'network-map'
+        }
+
+        return vtag
 
     def get_device(self, dev_name):
         """Get object representing device by name"""
