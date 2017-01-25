@@ -1,7 +1,7 @@
 """
 Routing cost provider that is using OSPF routing distance as its cost.
 """
-from altoserver.alto.costproviders.basecostprovider import BaseCostProvider
+from .basecostprovider import BaseCostProvider
 from altoserver import nm
 
 class OSPFCostProvider(BaseCostProvider):
@@ -12,6 +12,7 @@ class OSPFCostProvider(BaseCostProvider):
         super().__init__()
         self.cost_metric = 'routingcost'
         self.cost_mode = 'numerical'
+        self.cost_type = 'ospf-routingcost'
 
     def get_cost(self, srcs, dsts):
         """Return cost based on OSPF routing cost.
@@ -21,5 +22,6 @@ class OSPFCostProvider(BaseCostProvider):
         # Ensure we have something to work with
         assert any(srcs) and any(dsts)
 
+        # Repeat this for each SRC pid:
         # Get the PID of source IP
-        pass
+        

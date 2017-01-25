@@ -9,6 +9,7 @@ class BaseCostProvider(object):
         """Set properties"""
         self.cost_mode = None
         self.cost_metric = None
+        self.cost_type = None
 
     def get_cost(self, srcs, dsts):
         """Extending class should implement this"""

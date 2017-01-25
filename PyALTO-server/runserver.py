@@ -1,7 +1,5 @@
 """Main entry file for starting an ALTO server"""
 
-import logging
-
 from flask import Flask
 
 from altoserver.upload import netupload

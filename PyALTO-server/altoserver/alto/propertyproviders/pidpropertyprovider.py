@@ -3,7 +3,7 @@ Implement endpoint's PID provider
 """
 import ipaddress
 
-from altoserver.alto.propertyproviders.basepropertyprovider import BasePropertyProvider
+from .basepropertyprovider import BasePropertyProvider
 from altoserver import nm
 
 class PIDPropertyProvider(BasePropertyProvider):

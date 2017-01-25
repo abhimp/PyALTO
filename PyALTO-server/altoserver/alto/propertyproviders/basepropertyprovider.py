@@ -1,3 +1,6 @@
+"""
+Base class that all other property providers should extend.
+"""
 class BasePropertyProvider(object):
     """Implements base class for all property providers"""
 

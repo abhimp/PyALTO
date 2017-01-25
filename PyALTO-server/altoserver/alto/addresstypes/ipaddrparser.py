@@ -2,7 +2,7 @@
 Implement concrete IP address parser
 """
 import ipaddress
-from altoserver.alto.addresstypes.baseaddrtypeparser import BaseAddrTypeParser
+from .baseaddrtypeparser import BaseAddrTypeParser
 
 class IPAddrParser(BaseAddrTypeParser):
     """concrete IP address parser implementation"""

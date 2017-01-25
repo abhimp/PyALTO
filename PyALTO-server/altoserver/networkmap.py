@@ -14,7 +14,7 @@ class NetworkMap(object):
         """Initialize the network topology"""
 
         # Topology as MultiDiGraph (MultiDi - Since each link is two unidirectional edges)
-        self._topo = nx.MultiDiGraph()  
+        self._topo = nx.MultiDiGraph()
         self._net_pids = {}             # Pin_Name -> Pid object
         self._topo_version = 0          # Each topology change should change the version number
 
@@ -114,7 +114,7 @@ class NetworkMap(object):
 
     def get_pid_from_ip(self, ip_address):
         """Get the PID value from the given IP address"""
-        
+
         # Build candidates
         candidates = []
         for pid in self._net_pids.values():

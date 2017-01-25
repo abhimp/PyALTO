@@ -4,7 +4,6 @@ Implementation of ALTO protocol
 import ipaddress
 import logging
 
-from altoserver.networkmap import AltoPID
 from altoserver import nm
 
 class AltoServer(object):

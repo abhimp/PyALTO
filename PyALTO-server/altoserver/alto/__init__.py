@@ -8,11 +8,11 @@ import logging
 
 from flask import Blueprint, Response, request, abort
 
-from altoserver.alto.altoserver import AltoServer
+from .altoserver import AltoServer
 
-from altoserver.alto.addresstypes import *
-from altoserver.alto.costproviders import *
-from altoserver.alto.propertyproviders import *
+from .addresstypes import *
+from .costproviders import *
+from .propertyproviders import *
 
 alto_server = AltoServer()
 alto_server.register_address_parsers([ipaddrparser.IPAddrParser()])

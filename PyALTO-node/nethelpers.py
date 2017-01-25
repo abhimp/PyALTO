@@ -212,16 +212,36 @@ def _process_quagga_rt(in_lines):
                 else:
                     continue
         else:
-            # Look for anchor 'via'.
-            for num, token in enumerate(tokens):
-                if token == 'via':
-                    if cached:
-                        # Load cached
-                        subnet = last_subnet
-                        ad = last_ad
-                        rd = last_rd
+            # This is routing protocol line, but it might be directly connected.
+            if 'via' in tokens:
+                # Look for anchor 'via'.
+                for num, token in enumerate(tokens):
+                    if token == 'via':
+                        if cached:
+                            # Load cached
+                            subnet = last_subnet
+                            ad = last_ad
+                            rd = last_rd
+                        else:
+                            # Parse flieds before 'via'
+                            subnet = tokens[num-2]
+                            last_subnet = subnet
+                            (ad, rd) = tokens[num-1].strip('[]').split('/')
+                            ad = int(ad)
+                            rd = int(rd)
+                            last_ad = ad
+                            last_rd = rd
+
+                        gw = tokens[num+1].strip(',')
+                        adapter = tokens[num+2].strip(',')
+                        break
                     else:
-                        # Parse flieds before 'via'
+                        continue
+            elif 'is' in tokens:
+                # Look for anchor 'is'.
+                for num, token in enumerate(tokens):
+                    if token == 'is':
+                        # Extract data
                         subnet = tokens[num-2]
                         last_subnet = subnet
                         (ad, rd) = tokens[num-1].strip('[]').split('/')
@@ -229,12 +249,12 @@ def _process_quagga_rt(in_lines):
                         rd = int(rd)
                         last_ad = ad
                         last_rd = rd
-
-                    gw = tokens[num+1].strip(',')
-                    adapter = tokens[num+2].strip(',')
-                    break
-                else:
-                    continue
+                        gw = None
+                        adapter = tokens[num+3].strip(',')
+                    else:
+                        continue
+            else:
+                raise NotImplementedError
 
         out.append({
             'protocol': proto,
