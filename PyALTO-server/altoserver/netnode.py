@@ -7,15 +7,22 @@ class NetNode(object):
     # Once created, all properties should be public, but changes
     # should be strictly controlled, hence using @property.
 
-    def __init__(self, name, dev_type):
+    def __init__(self, name, dev_type, in_ips=[], upst=None):
         """Initialize the device"""
+
+        # Eventually this should be L2device, L3device, NFdevice (netflow switch), server, user etc.
+        self._type = None       # Device type (router, switch, adslam, user)
+        self._name = None       # Device name
         self._upstream = None   # Upstream device (user->adslam, adslam->router, router->None)
         self._ip_addresses = [] # IP addresses assigned to device. Switch will have none
-        self._name = name       # Device's name
-        self._type = dev_type   # router, switch, adslam, user
         self._rt = None         # Routing table
         self._qrt = None        # Quagga routing table
         self._intf_stat = None  # Network interface stats
+
+        self._name = name       
+        self._type = dev_type
+        self._ip_addresses.extend(in_ips)
+        self._upstream = upst
 
     @property
     def upstream(self):
@@ -58,7 +65,7 @@ class NetNode(object):
     def quagga_routing_table(self, qrt):
         """Set new Quagga routing table"""
         assert self._type == 'router'
-        self._qrt = get_qrt_iterator
+        self._qrt = qrt
 
     @property
     def interface_stats(self):

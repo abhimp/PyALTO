@@ -32,36 +32,89 @@ class NetworkMap(object):
     def init_simple_topo(self):
         """Create a simple topology for testing"""
 
-        # Add two nodes
-        dev_names = ['core-dev', 'r2']
-        for dn in dev_names:
-            node = NetNode(dn, 'router')
-            self._topo.add_node(node)
+        # ADSLAM user's IPs are:
+        # 192.168.<ADSLAM_ID>.<USER_ID+2>/24 (USER_ID=1 reserved for router)
+        num_bras = 4
+        adslams_per_bras = 2
+        homes_per_adslam = 6
 
-        self.add_pid_to_topology(
-            'home-0',
-            [ipaddress.IPv4Network('192.168.0.0/24')]
+        global_adslam_index = 0     # Counter for ADSLAM numbers
+        
+        # Build BRAS->ADSLAM->HOME network
+        for bras_id in range(0, num_bras+1):
+            # Build BRAS as connected infrastructure
+            bras_name = 'bras-{}'.format(bras_id)
+            bras = NetNode(bras_name, 'router')
+            self._topo.add_node(bras)
+
+            for adslam_id in range(0, adslams_per_bras+1):
+                # Build IP range for ADSLAM
+                this_adslam_id = global_adslam_index
+                global_adslam_index += 1
+                adslam_prefix = '192.168.{}.0/24'.format(this_adslam_id)
+                adslam_name = 'adslam-{}'.format(this_adslam_id)
+                adslam_net = ipaddress.ip_network(adslam_prefix)
+
+                # Add ADSLAM Object
+                adslam = NetNode(adslam_name, 'adslam', [], bras_name)
+                self._topo.add_node(adslam)
+                self._topo.add_edge(adslam, bras)
+                self._topo.add_edge(bras, adslam)
+
+                # Add conencted homes
+                for home_id in range(0, homes_per_adslam+1):
+                    home = NetNode(
+                        'home-{}-{}'.format(this_adslam_id, home_id),
+                        'user',
+                        [adslam_net[home_id+2]],
+                        adslam_name
+                    )
+                    self._topo.add_node(home)
+                    self._topo.add_edge(home, adslam)
+                    self._topo.add_edge(adslam, home)
+
+                # Add pid representing ADSLAM
+                self.add_pid_to_topology(adslam_name, [adslam_net])
+
+        # Interconnect BRASes
+        # 0-1
+        self._topo.add_edge(
+            self._topo['bras-0'],
+            self._topo['bras-1']
+        )
+        self._topo.add_edge(
+            self._topo['bras-1'],
+            self._topo['bras-0']
         )
 
-        self.add_pid_to_topology(
-            'home-1',
-            [ipaddress.IPv4Network('192.168.1.0/24')]
+        # 1-2
+        self._topo.add_edge(
+            self._topo['bras-1'],
+            self._topo['bras-2']
+        )
+        self._topo.add_edge(
+            self._topo['bras-2'],
+            self._topo['bras-1']
         )
 
-        self.add_pid_to_topology(
-            'home-2',
-            [ipaddress.IPv4Network('192.168.2.0/24')]
+        # 2-3
+        self._topo.add_edge(
+            self._topo['bras-2'],
+            self._topo['bras-3']
+        )
+        self._topo.add_edge(
+            self._topo['bras-3'],
+            self._topo['bras-2']
         )
 
-        self.add_pid_to_topology(
-            'home-3',
-            [ipaddress.IPv4Network('192.168.3.0/24')]
+        # 3-1
+        self._topo.add_edge(
+            self._topo['bras-3'],
+            self._topo['bras-1']
         )
-
-        self.add_pid_to_topology(
-            'dc-0',
-            [ipaddress.IPv4Network('192.168.100.0/24'),
-             ipaddress.IPv4Network('192.168.102.0/24'),]
+        self._topo.add_edge(
+            self._topo['bras-1'],
+            self._topo['bras-3']
         )
 
         # Update version id once change is done
@@ -134,7 +187,7 @@ class NetworkMap(object):
             return None
 
         # Return name of candidate with longest prefix
-        (prefix, pid) = min(candidates, key=lambda x: x[0].prefixlen)
+        (prefix, pid) = max(candidates, key=lambda x: x[0].prefixlen)
         return pid.name
 
     def get_dev_from_ip(self, ip_address):
