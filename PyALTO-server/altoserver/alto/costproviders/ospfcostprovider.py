@@ -83,7 +83,7 @@ class OSPFCostProvider(BaseCostProvider):
             return None
 
         rd_min = None
-        for route_line in router.get_qrt_iterator():
+        for route_line in router.quagga_routing_table():
             if route_line['protocol'] != 'O':
                 continue
 

@@ -4,43 +4,71 @@ Representation of network device
 
 class NetNode(object):
     """NetNode class represents a single network device"""
+    # Once created, all properties should be public, but changes
+    # should be strictly controlled, hence using @property.
 
     def __init__(self, name, dev_type):
         """Initialize the device"""
-
-        self.name = name
-        self.type = dev_type    # router, switch, adslam, user
-        self.upstream = None    # Upstream device (user->adslam, adslam->router, router->None)
-        self.ip_addresses = []  # IP addresses assigned to device. Switch will have none
-
+        self._upstream = None   # Upstream device (user->adslam, adslam->router, router->None)
+        self._ip_addresses = [] # IP addresses assigned to device. Switch will have none
+        self._name = name       # Device's name
+        self._type = dev_type   # router, switch, adslam, user
         self._rt = None         # Routing table
         self._qrt = None        # Quagga routing table
+        self._intf_stat = None  # Network interface stats
 
-    def update_routing_table(self, routing_table):
-        """Update routing table maintained in the device"""
+    @property
+    def upstream(self):
+        """Get name of upstream device"""
+        return self._upstream
 
-        # This is applicable only to router type
+    @property
+    def ip_addresses(self):
+        """Get list of configured IP addresses"""
+        return self._ip_addresses
+
+    @property
+    def name(self):
+        """Get device name"""
+        return self._name
+
+    @property
+    def type(self):
+        """Get device type"""
+        return self._type
+
+    @property
+    def routing_table(self):
+        """Get routing table"""
+        return self._rt
+
+    @routing_table.setter
+    def routing_table(self, rt):
+        """Update routing table"""
         assert self.type == 'router'
+        self._rt = rt
 
-        self._rt = routing_table
+    @property
+    def quagga_routing_table(self):
+        """Get Quagga routing table"""
+        assert self._type == 'router'
+        return self._qrt
 
-    def update_quagga_table(self, quagga_rt):
-        """Update quagga routing table"""
+    @quagga_routing_table.setter
+    def quagga_routing_table(self, qrt):
+        """Set new Quagga routing table"""
+        assert self._type == 'router'
+        self._qrt = get_qrt_iterator
 
-        # Only for routers
-        assert self.type == 'router'
+    @property
+    def interface_stats(self):
+        """Return network interface stats"""
+        return self._intf_stat
 
-        self._qrt = quagga_rt
-
-    def get_if_to(self, destination_address):
-        """Get the interface to destination"""
-        pass
-
-    def get_rt_iterator(self):
-        return iter(self._rt)
-
-    def get_qrt_iterator(self):
-        return iter(self._qrt)
+    @interface_stats.setter
+    def interface_stats(self, intf_stat):
+        """Set new interface stats"""
+        self._intf_stat = intf_stat
 
     def __eq__(self, other):
         """Implement equality comparer"""
