@@ -137,14 +137,38 @@ class NetworkMap(object):
         (prefix, pid) = min(candidates, key=lambda x: x[0].prefixlen)
         return pid.name
 
+    def get_dev_from_ip(self, ip_address):
+        """Get device from given IP address"""
+
+        # Ensure we have sane parameters
+        assert (isinstance(ip_address, ipaddress.IPv4Address) or
+                isinstance(ip_address, ipaddress.IPv4Address))
+
+        # Look for a device having required ip address
+        for device in self._topo.nodes_iter():
+            if ip_address in device.ip_addresses:
+                return device
+
+        # none found
+        return None
 
 class AltoPID(object):
     """Class representing a single ALTO PID per [RFC7285] §5.1"""
 
+    @staticmethod
+    def verify_pid_name(name):
+        """Implement name verification per [RFC7285] §10.1"""
+
+        # TODO: Do the proper implementation
+        if len(name) > 64:
+            return False
+
+        return True
+
     def __init__(self, name, ip_prefix_list):
         """Init ALTO PID object"""
 
-        if self._verify_pid_name(name):
+        if AltoPID.verify_pid_name(name):
             self.name = name
         else:
             raise NameError('Name format is wrong')
@@ -160,28 +184,19 @@ class AltoPID(object):
             else:
                 raise Exception('The future is here')
 
-    def _verify_pid_name(self, name):
-        """Implement name verification per [RFC7285] §10.1"""
-
-        # TODO: Do the proper implementation
-        if len(name) > 64:
-            return False
-
-        return True
-
     def get_json_repr(self):
         """Get JSON encodable representation"""
 
-        repr = {}
+        prefix_dict = {}
 
         if any(self.ipv4_prefixes):
-            repr['ipv4'] = []
+            prefix_dict['ipv4'] = []
             for prefix in self.ipv4_prefixes:
-                repr['ipv4'].append(str(prefix))
+                prefix_dict['ipv4'].append(str(prefix))
 
         if any(self.ipv6_prefixes):
-            repr['ipv6'] = []
+            prefix_dict['ipv6'] = []
             for prefix in self.ipv6_prefixes:
-                repr['ipv6'].append(str(prefix))
+                prefix_dict['ipv6'].append(str(prefix))
 
-        return (self.name, repr)
+        return (self.name, prefix_dict)

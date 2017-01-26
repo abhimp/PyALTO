@@ -20,8 +20,8 @@ class IPAddrParser(BaseAddrTypeParser):
         assert in_addr.count(':') == 1
 
         # Split address and valdiate
-        (type, address) = in_addr.split(':')
-        assert type.lower() == 'ipv4' or type.lower() == 'ipv6'
+        (addr_type, address) = in_addr.split(':')
+        assert addr_type.lower() == 'ipv4' or addr_type.lower() == 'ipv6'
 
         # Return the IP Address object
         return ipaddress.ip_address(address)

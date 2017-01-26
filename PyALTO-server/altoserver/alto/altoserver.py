@@ -199,5 +199,5 @@ class AltoServer(object):
             for parser in self._address_parsers:
                 if type(address) in parser.types:
                     return parser
-        # No parsers 
+        # No parsers
         return None

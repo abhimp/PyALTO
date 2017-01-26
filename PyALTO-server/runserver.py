@@ -7,7 +7,7 @@ from altoserver.alto import alto
 from altoserver import nm
 
 # Buil Flask application
-app = Flask(__name__, instance_relative_config = True)
+app = Flask(__name__, instance_relative_config=True)
 
 app.register_blueprint(netupload, url_prefix='/upload')
 app.register_blueprint(alto, url_prefix='/alto')
