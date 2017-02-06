@@ -33,7 +33,7 @@ class OSPFCostProvider(BaseCostProvider):
         #   3. Get OSPF RD for each destination
         costmap = {}
         for source_ip in srcs:
-            device = nm.get_dev_from_ip(source_ip)
+            device = nm.get_device_by_ip(source_ip)
 
             # No such device
             if device is None:
@@ -63,7 +63,7 @@ class OSPFCostProvider(BaseCostProvider):
     def _get_upstream_router(self, device_name):
         """Given the device name find first hop router"""
 
-        device = nm.get_device(device_name)
+        device = nm.get_device_by_name(device_name)
 
         if device is None:
             return None
@@ -78,7 +78,7 @@ class OSPFCostProvider(BaseCostProvider):
         assert (isinstance(destination, ipaddress.IPv4Address) or
                 isinstance(destination, ipaddress.IPv6Address))
 
-        router = nm.get_device(router_name)
+        router = nm.get_device_by_name(router_name)
         if router is None:
             return None
 

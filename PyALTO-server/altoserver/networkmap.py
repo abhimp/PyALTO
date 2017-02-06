@@ -32,16 +32,20 @@ class NetworkMap(object):
     def init_simple_topo(self):
         """Create a simple topology for testing"""
 
+        # For use by dev machine
+        core = NetNode('core-dev', 'router')
+        self._topo.add_node(core)
+
         # ADSLAM user's IPs are:
         # 192.168.<ADSLAM_ID>.<USER_ID+2>/24 (USER_ID=1 reserved for router)
-        num_bras = 4
+        num_bras = 6
         adslams_per_bras = 2
         homes_per_adslam = 6
 
         global_adslam_index = 0     # Counter for ADSLAM numbers
         
         # Build BRAS->ADSLAM->HOME network
-        for bras_id in range(0, num_bras+1):
+        for bras_id in range(0, num_bras):
             # Build BRAS as connected infrastructure
             bras_name = 'bras-{}'.format(bras_id)
             bras = NetNode(bras_name, 'router')
@@ -63,10 +67,18 @@ class NetworkMap(object):
 
                 # Add conencted homes
                 for home_id in range(0, homes_per_adslam+1):
+                    home_name = 'home-{}-{}'.format(this_adslam_id, home_id)
                     home = NetNode(
-                        'home-{}-{}'.format(this_adslam_id, home_id),
+                        home_name,
                         'user',
-                        [adslam_net[home_id+2]],
+                        [
+                            ipaddress.ip_interface(
+                                '{}/{}'.format(
+                                    str(adslam_net[home_id+2]),
+                                    '32'
+                                )
+                            )
+                        ],
                         adslam_name
                     )
                     self._topo.add_node(home)
@@ -77,45 +89,23 @@ class NetworkMap(object):
                 self.add_pid_to_topology(adslam_name, [adslam_net])
 
         # Interconnect BRASes
-        # 0-1
-        self._topo.add_edge(
-            self._topo['bras-0'],
-            self._topo['bras-1']
-        )
-        self._topo.add_edge(
-            self._topo['bras-1'],
-            self._topo['bras-0']
-        )
+        self._topo.add_edge('bras-0', 'bras-1')
+        self._topo.add_edge('bras-1', 'bras-0')
 
-        # 1-2
-        self._topo.add_edge(
-            self._topo['bras-1'],
-            self._topo['bras-2']
-        )
-        self._topo.add_edge(
-            self._topo['bras-2'],
-            self._topo['bras-1']
-        )
+        self._topo.add_edge('bras-1', 'bras-2')
+        self._topo.add_edge('bras-2', 'bras-1')
 
-        # 2-3
-        self._topo.add_edge(
-            self._topo['bras-2'],
-            self._topo['bras-3']
-        )
-        self._topo.add_edge(
-            self._topo['bras-3'],
-            self._topo['bras-2']
-        )
+        self._topo.add_edge('bras-0', 'bras-3')
+        self._topo.add_edge('bras-3', 'bras-0')
 
-        # 3-1
-        self._topo.add_edge(
-            self._topo['bras-3'],
-            self._topo['bras-1']
-        )
-        self._topo.add_edge(
-            self._topo['bras-1'],
-            self._topo['bras-3']
-        )
+        self._topo.add_edge('bras-2', 'bras-5')
+        self._topo.add_edge('bras-5', 'bras-2')
+
+        self._topo.add_edge('bras-3', 'bras-4')
+        self._topo.add_edge('bras-4', 'bras-3')
+
+        self._topo.add_edge('bras-4', 'bras-5')
+        self._topo.add_edge('bras-5', 'bras-4')
 
         # Update version id once change is done
         self._topo_version += 1
@@ -148,18 +138,15 @@ class NetworkMap(object):
 
         return vtag
 
-    def get_device(self, dev_name):
+    def get_device_by_name(self, dev_name):
         """Get object representing device by name"""
 
         # Try to get obj by name
-        try:
-            dev = self._topo[dev_name]
-        except:
-            # There is no such device
-            return None
+        for dev in self._topo:
+            if dev == dev_name:
+                return dev            
 
-        # Return the device
-        return dev
+        return None
 
     def get_pid_from_dev_name(self, dev_name):
         """Get the PID value from the given device name"""
@@ -190,7 +177,7 @@ class NetworkMap(object):
         (prefix, pid) = max(candidates, key=lambda x: x[0].prefixlen)
         return pid.name
 
-    def get_dev_from_ip(self, ip_address):
+    def get_device_by_ip(self, ip_address):
         """Get device from given IP address"""
 
         # Ensure we have sane parameters
@@ -198,9 +185,10 @@ class NetworkMap(object):
                 isinstance(ip_address, ipaddress.IPv4Address))
 
         # Look for a device having required ip address
-        for device in self._topo.nodes_iter():
-            if ip_address in device.ip_addresses:
-                return device
+        for device in self._topo:
+            for ip_inf in device.ip_interfaces:
+                if ip_inf.ip == ip_address:
+                    return device
 
         # none found
         return None

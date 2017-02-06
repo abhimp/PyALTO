@@ -17,7 +17,10 @@ from .propertyproviders import *
 alto_server = AltoServer()
 alto_server.register_address_parsers([ipaddrparser.IPAddrParser()])
 alto_server.register_cost_providers([ospfcostprovider.OSPFCostProvider()])
-alto_server.register_property_providers([pidpropertyprovider.PIDPropertyProvider()])
+alto_server.register_property_providers([
+    pidpropertyprovider.PIDPropertyProvider(),
+    hostnamepropertyprovider.HostnamePropertyProvider(),
+])
 
 alto = Blueprint('alto', __name__)
 

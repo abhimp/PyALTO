@@ -1,1 +1,1 @@
-__all__ = ['pidpropertyprovider']
+__all__ = ['pidpropertyprovider', 'hostnamepropertyprovider']
