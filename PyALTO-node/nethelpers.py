@@ -96,12 +96,11 @@ def _get_iface_addr(iface):
     """Extract iface addr details from ip utility"""
 
     # Get Quagga RT
+    shl = shlex.split('ip -a -d -o addr list {}'.format(iface))
     with subprocess.Popen(
-        shlex.split(
-            'ip -a -d -o addr list {}'.format(iface)
-        ),
+        shl,
         stdout=subprocess.PIPE,
-        shell=True,
+        #shell=True,
         universal_newlines=True) as popen_ip:
 
         ip_addr_data = popen_ip.stdout.readlines()
@@ -133,30 +132,33 @@ def _parse_ip_addr_single_line(line):
 
     # Process block one
     tokens = block1.split(' ')
+
     data['id'] = tokens[0].strip(':')
     data['name'] = tokens[1]
-    data['family'] = tokens[2]
-    data['address'] = tokens[3]
+    data['family'] = tokens[5]
+    data['address'] = tokens[6]
 
-    if data['family'] == 'inet':
-        data['brd'] = tokens[5]
-        scope_val_id = 7
-    else:
-        scope_val_id = 5
+    for key, token in enumerate(tokens):
+        if token == 'brd':
+            data['brd'] = tokens[key+1]
 
-    data['scope'] = tokens[scope_val_id]
+        if token == 'scope':
+            data['scope'] = tokens[key+1]
 
     # Process block 2
     tokens = block2.split(' ')
-    if tokens[1] == 'forever':
-        data['valid_left'] = -1
-    else:
-        data['valid_left'] = int(tokens[1].strip('sec'))
+    for key, token in enumerate(tokens):
+        if token == 'valid_lft':
+            if tokens[key+1] == 'forever':
+                data['valid_left'] = -1
+            else:
+                data['valid_left'] = int(tokens[key+1].strip('sec'))
 
-    if tokens[3] == 'forever':
-        data['preferred_left'] = -1
-    else:
-        data['preferred_left'] = int(tokens[1].strip('sec'))
+        if token == 'preferred_lft':
+            if tokens[key+1] == 'forever':
+                data['preferred_left'] = -1
+            else:
+                data['preferred_left'] = int(tokens[key+1].strip('sec'))
 
     return data
 
@@ -195,12 +197,17 @@ def _get_interface_stats(interface_name):
     # Return the collected data
     return stat_data
 
-def get_net_adapter_names():
+def get_net_adapter_names(skip_lo=True):
     """Get the names of network adapters"""
 
     # Iterate over adapter names and skip loopback
     sys_dir = '/sys/class/net'
-    interface_names = [iname for iname in os.listdir(sys_dir) if iname != 'lo']
+
+    if skip_lo:
+        interface_names = [iname for iname in os.listdir(sys_dir) if iname != 'lo']
+    else:
+        interface_names = [iname for iname in os.listdir(sys_dir)]
+
 
     return interface_names
 

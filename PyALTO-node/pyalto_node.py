@@ -52,7 +52,7 @@ def report_stats(run_args):
 
     # POST adapter addresses
     adapter_addresses = nethelpers.get_interfaces_addresses()
-    requests.post(server_url + 'adapter_addr', json=adapter_stats)
+    requests.post(server_url + 'adapter_addr', json=adapter_addresses)
 
     # If this is router POST routing table
     if run_args.dev_type == 'router':
