@@ -60,7 +60,8 @@ def report_stats(run_args):
         requests.post(server_url + 'rtable', json=rtable)
 
         quagga_rt = nethelpers.get_quagga_rt()
-        requests.post(server_url + 'quagga_rt', json=quagga_rt)
+        if quagga_rt is not None:
+            requests.post(server_url + 'quagga_rt', json=quagga_rt)
 
     # Schedule next run
     loop = asyncio.get_event_loop()
