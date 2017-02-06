@@ -9,6 +9,7 @@ import logging
 import binascii
 import sys
 import subprocess
+import shlex
 
 def get_routing_table():
     """Extract the node's routing table in usable format"""
@@ -77,6 +78,87 @@ def _parse_rt_line(str_line):
             logging.error('Unexpected number of RT line tokens!')
 
     return rt_line
+
+def get_interfaces_addresses():
+    """Collect interface address details"""
+
+    # Get the liost of active interfaces
+    interfaces = get_net_adapter_names()
+
+    # Loop over all interfaces collecting all addresses
+    if_details = {}
+    for iface in interfaces:
+        if_details[iface] = _get_iface_addr(iface)
+
+    return if_details
+
+def _get_iface_addr(iface):
+    """Extract iface addr details from ip utility"""
+
+    # Get Quagga RT
+    with subprocess.Popen(
+        shlex.split(
+            'ip -a -d -o addr list {}'.format(iface)
+        ),
+        stdout=subprocess.PIPE,
+        shell=True,
+        universal_newlines=True) as popen_ip:
+
+        ip_addr_data = popen_ip.stdout.readlines()
+
+    # Strip the newlines
+    lines = [line.replace('\n', '') for line in ip_addr_data]
+
+    # Parse all line
+    parsed_data = [_parse_ip_addr_single_line(line) for line in lines]
+
+    return parsed_data
+
+def _parse_ip_addr_single_line(line):
+    """Parse a single line from ip addr list command"""
+
+    data = {
+        'id': None,
+        'name': '',
+        'family': '',
+        'address': '',
+        'brd': '',
+        'scope': '',
+        'valid_left': None,
+        'preferred_left': None
+    }
+
+    # Split into to blocks
+    (block1, block2) = line.split('\\')
+
+    # Process block one
+    tokens = block1.split(' ')
+    data['id'] = tokens[0].strip(':')
+    data['name'] = tokens[1]
+    data['family'] = tokens[2]
+    data['address'] = tokens[3]
+
+    if data['family'] == 'inet':
+        data['brd'] = tokens[5]
+        scope_val_id = 7
+    else:
+        scope_val_id = 5
+
+    data['scope'] = tokens[scope_val_id]
+
+    # Process block 2
+    tokens = block2.split(' ')
+    if tokens[1] == 'forever':
+        data['valid_left'] = -1
+    else:
+        data['valid_left'] = int(tokens[1].strip('sec'))
+
+    if tokens[3] == 'forever':
+        data['preferred_left'] = -1
+    else:
+        data['preferred_left'] = int(tokens[1].strip('sec'))
+
+    return data
 
 def collect_all_interface_stats():
     """Collect and return stats of all interfaces"""

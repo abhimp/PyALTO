@@ -50,6 +50,10 @@ def report_stats(run_args):
     adapter_stats = nethelpers.collect_all_interface_stats()
     requests.post(server_url + 'adapter_stats', json=adapter_stats)
 
+    # POST adapter addresses
+    adapter_addresses = nethelpers.get_interfaces_addresses()
+    requests.post(server_url + 'adapter_addr', json=adapter_stats)
+
     # If this is router POST routing table
     if run_args.dev_type == 'router':
         rtable = nethelpers.get_routing_table()
