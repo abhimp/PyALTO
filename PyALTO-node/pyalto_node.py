@@ -8,6 +8,7 @@ import sys
 import socket
 import ptvsd
 import requests
+import traceback
 
 import nethelpers
 
@@ -42,26 +43,30 @@ def main(run_args):
 
 def report_stats(run_args):
     """Periodically report stats"""
+    try:
+        # Make base URL
+        server_url = 'http://' + run_args.alto_server + '/upload/' + socket.gethostname() + '/'
 
-    # Make base URL
-    server_url = 'http://' + run_args.alto_server + '/upload/' + socket.gethostname() + '/'
+        # POST adapeter counters
+        adapter_stats = nethelpers.collect_all_interface_stats()
+        requests.post(server_url + 'adapter_stats', json=adapter_stats)
 
-    # POST adapeter counters
-    adapter_stats = nethelpers.collect_all_interface_stats()
-    requests.post(server_url + 'adapter_stats', json=adapter_stats)
+        # POST adapter addresses
+        adapter_addresses = nethelpers.get_interfaces_addresses()
+        requests.post(server_url + 'adapter_addr', json=adapter_addresses)
 
-    # POST adapter addresses
-    adapter_addresses = nethelpers.get_interfaces_addresses()
-    requests.post(server_url + 'adapter_addr', json=adapter_addresses)
+        # If this is router POST routing table
+        if run_args.dev_type == 'router':
+            rtable = nethelpers.get_routing_table()
+            requests.post(server_url + 'rtable', json=rtable)
 
-    # If this is router POST routing table
-    if run_args.dev_type == 'router':
-        rtable = nethelpers.get_routing_table()
-        requests.post(server_url + 'rtable', json=rtable)
-
-        quagga_rt = nethelpers.get_quagga_rt()
-        if quagga_rt is not None:
-            requests.post(server_url + 'quagga_rt', json=quagga_rt)
+            quagga_rt = nethelpers.get_quagga_rt()
+            if quagga_rt is not None:
+                requests.post(server_url + 'quagga_rt', json=quagga_rt)
+    
+    # Consume OSError when remote is not answering
+    except OSError as exc:
+        logging.error('Consumed OSError: %s', exc)
 
     # Schedule next run
     loop = asyncio.get_event_loop()
