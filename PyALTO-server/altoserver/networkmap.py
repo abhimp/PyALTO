@@ -29,6 +29,77 @@ class NetworkMap(object):
         # This overwrites old value
         self._net_pids[new_pid.name] = new_pid
 
+    def init_small_topo(self):
+        """Create a simple small topology"""
+        core = NetNode('core-0', 'router')
+        self._topo.add_node(core)
+        self.add_pid_to_topology('core-dc', [
+            ipaddress.ip_interface('192.168.240.0/24'),
+            ipaddress.ip_interface('192.168.245.0/24')
+        ])
+
+        global_adslam_index = 0
+        homes_per_adslam = 6
+
+        for brasid in range(3):
+            bras_name = 'bras-{}'.format(brasid)
+            bras = NetNode(bras_name, 'router')
+            self._topo.add_node(bras)
+
+            for adslamid in range(2):
+                # Build IP range for ADSLAM
+                this_adslam_id = global_adslam_index
+                global_adslam_index += 1
+                adslam_prefix = '192.168.{}.0/24'.format(this_adslam_id)
+                adslam_name = 'adslam-{}'.format(this_adslam_id)
+                adslam_net = ipaddress.ip_network(adslam_prefix)
+
+                # Add ADSLAM Object
+                adslam = NetNode(adslam_name, 'adslam', [], bras_name)
+                self._topo.add_node(adslam)
+                self._topo.add_edge(adslam, bras)
+                self._topo.add_edge(bras, adslam)
+
+                # Add conencted homes
+                for home_id in range(0, homes_per_adslam+1):
+                    home_name = 'home-{}-{}'.format(this_adslam_id, home_id)
+                    home = NetNode(
+                        home_name,
+                        'user',
+                        [
+                            ipaddress.ip_interface(
+                                '{}/{}'.format(
+                                    str(adslam_net[home_id+2]),
+                                    '32'
+                                )
+                            )
+                        ],
+                        adslam_name
+                    )
+                    self._topo.add_node(home)
+                    self._topo.add_edge(home, adslam)
+                    self._topo.add_edge(adslam, home)
+
+                # Add pid representing ADSLAM
+                self.add_pid_to_topology(adslam_name, [adslam_net])
+
+        # connect BRAS/CORE
+        self._topo.add_edge('bras-0', 'bras-1')
+        self._topo.add_edge('bras-1', 'bras-0')
+
+        self._topo.add_edge('bras-1', 'bras-2')
+        self._topo.add_edge('bras-2', 'bras-1')
+
+        self._topo.add_edge('bras-0', 'bras-2')
+        self._topo.add_edge('bras-2', 'bras-0')
+
+        self._topo.add_edge('bras-0', 'core-0')
+        self._topo.add_edge('core-0', 'bras-0')
+
+        self._topo.add_edge('bras-2', 'core-0')
+        self._topo.add_edge('core-0', 'bras-2')
+
+
     def init_simple_topo(self):
         """Create a simple topology for testing"""
 
