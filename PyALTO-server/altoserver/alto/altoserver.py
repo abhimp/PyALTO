@@ -136,14 +136,14 @@ class AltoServer(object):
         # Get costs provided by cost estimator
         cost_map = cost_estimator.get_cost(endpoints['srcs'], endpoints['dsts'])
         
-        resp = {
+        costmap_response = {
             'meta' : {
                 'cost-type' : cost_type
             },
             'endpoint-cost-map': cost_map
         }
 
-        return repr
+        return costmap_response
 
     def register_address_parsers(self, addr_parsers):
         """Register given parsers with the server"""

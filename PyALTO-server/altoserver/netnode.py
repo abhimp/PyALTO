@@ -54,13 +54,20 @@ class NetNode(object):
     @property
     def routing_table(self):
         """Get routing table"""
-        return self._rt
+        assert self._type == 'router'
+        if self._rt is None:
+            return []
+        else:
+            return self._rt
 
     @property
     def quagga_routing_table(self):
         """Get Quagga routing table"""
         assert self._type == 'router'
-        return self._qrt
+        if self._qrt is None:
+            return []
+        else:
+            return self._qrt
 
     @property
     def interface_stats(self):

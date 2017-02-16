@@ -119,7 +119,7 @@ def get_endpoint_cost():
     # data here. This is only a shim layer
 
     try:
-        resp = alto_server.get_endpoint_costs(
+        costmap = alto_server.get_endpoint_costs(
             req_data['cost-type'],
             req_data['endpoints']
         )
@@ -129,6 +129,6 @@ def get_endpoint_cost():
 
     # Return if successfull
     return Response(
-        json.dumps(resp),
+        json.dumps(costmap),
         mimetype='application/alto-endpointcost+json'
     )

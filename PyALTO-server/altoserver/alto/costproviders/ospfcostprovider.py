@@ -20,17 +20,21 @@ class OSPFCostProvider(BaseCostProvider):
 
         self._ip_parser = IPAddrParser()
 
-    def get_cost(self, srcs, dsts):
+    def get_cost(self, in_srcs, in_dsts):
         """Return cost based on OSPF routing cost.
         srcs and dsts is [ipaddress]
         """
 
-        str_src = '({})'.format(';'.join(map(str, srcs)))
-        str_dst = '({})'.format(';'.join(map(str, dsts)))
+        str_src = '({})'.format(';'.join(map(str, in_srcs)))
+        str_dst = '({})'.format(';'.join(map(str, in_dsts)))
         logging.info('OSPF RD request: From: %s To: %s', str_src, str_dst)
 
         # Ensure we have something to work with
-        assert any(srcs) and any(dsts)
+        assert any(in_srcs) and any(in_dsts)
+
+        # Parse endpoint addrs to Python objects
+        srcs = [self._ip_parser.to_object(saddr) for saddr in in_srcs]
+        dsts = [self._ip_parser.to_object(daddr) for daddr in in_dsts]
 
         # Algorithm (for each SRC IP):
         #   1. Get Device from IP
@@ -42,6 +46,7 @@ class OSPFCostProvider(BaseCostProvider):
 
             # No such device
             if device is None:
+                logging.info('Device having addr: %s not found', str(source_ip))
                 continue
 
             # Find first hop router
@@ -49,6 +54,8 @@ class OSPFCostProvider(BaseCostProvider):
 
             # Nothing found
             if first_hop_rtr is None:
+                logging.info('First hop router for source ip %s not found',
+                             str(source_ip))
                 continue
 
             # Extract destination OSPF RD for each destination
@@ -59,6 +66,9 @@ class OSPFCostProvider(BaseCostProvider):
                     distances[self._ip_parser.from_object(dst_addr)] = ospf_rd
                     logging.info('OSPF RD: From: %s To: %s -> %s', 
                                  str(source_ip), str(dst_addr), ospf_rd)
+                else:
+                    logging.info('OSPF cost from %s to %s not found',
+                                 str(source_ip), str(dst_addr))
 
             # Save results if any
             if any(distances):
@@ -77,7 +87,7 @@ class OSPFCostProvider(BaseCostProvider):
         elif device.type == 'router':
             return device.name
         else:
-            self._get_upstream_router(device.upstream)
+            return self._get_upstream_router(device.upstream)
 
     def _get_ospf_rd(self, router_name, destination):
         """Given router name, ger OSPF RD for each destination"""
@@ -89,8 +99,13 @@ class OSPFCostProvider(BaseCostProvider):
         if router is None:
             return None
 
+        # Check for entires in Quagga RT
+        quagga_rt = router.quagga_routing_table
+        if not any(quagga_rt):
+            return None
+
         rd_min = None
-        for route_line in router.quagga_routing_table():
+        for route_line in quagga_rt:
             if route_line['protocol'] != 'O':
                 continue
 
