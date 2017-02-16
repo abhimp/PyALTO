@@ -34,8 +34,8 @@ class NetworkMap(object):
         core = NetNode('core-0', 'router')
         self._topo.add_node(core)
         self.add_pid_to_topology('core-dc', [
-            ipaddress.ip_interface('192.168.240.0/24'),
-            ipaddress.ip_interface('192.168.245.0/24')
+            ipaddress.ip_network('192.168.240.0/24'),
+            ipaddress.ip_network('192.168.245.0/24')
         ])
 
         global_adslam_index = 0
@@ -289,6 +289,10 @@ class AltoPID(object):
         self.ipv6_prefixes = []
 
         for ip_prefix in ip_prefix_list:
+            # Ensure we are not passed IPv4Interface / IPv4Address
+            assert (isinstance(ip_prefix, ipaddress.IPv4Network) or
+                    isinstance(ip_prefix, ipaddress.IPv6Network))
+
             if ip_prefix.version == 4:
                 self.ipv4_prefixes.append(ip_prefix)
             elif ip_prefix.version == 6:
