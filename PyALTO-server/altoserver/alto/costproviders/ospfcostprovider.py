@@ -2,6 +2,7 @@
 Routing cost provider that is using OSPF routing distance as its cost.
 """
 import ipaddress
+import logging
 
 from altoserver import nm
 from .basecostprovider import BaseCostProvider
@@ -23,6 +24,10 @@ class OSPFCostProvider(BaseCostProvider):
         """Return cost based on OSPF routing cost.
         srcs and dsts is [ipaddress]
         """
+
+        str_src = '({})'.format(';'.join(map(str, srcs)))
+        str_dst = '({})'.format(';'.join(map(str, dsts)))
+        logging.info('OSPF RD request: From: %s To: %s', str_src, str_dst)
 
         # Ensure we have something to work with
         assert any(srcs) and any(dsts)
@@ -52,6 +57,8 @@ class OSPFCostProvider(BaseCostProvider):
                 ospf_rd = self._get_ospf_rd(first_hop_rtr, dst_addr)
                 if ospf_rd is not None:
                     distances[self._ip_parser.from_object(dst_addr)] = ospf_rd
+                    logging.info('OSPF RD: From: %s To: %s -> %s', 
+                                 str(source_ip), str(dst_addr), ospf_rd)
 
             # Save results if any
             if any(distances):

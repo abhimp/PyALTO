@@ -2,6 +2,7 @@
 Implement endpoint's Hostname provider
 """
 import ipaddress
+import logging
 
 from .basepropertyprovider import BasePropertyProvider
 from altoserver import nm
@@ -16,6 +17,8 @@ class HostnamePropertyProvider(BasePropertyProvider):
     def get_property(self, endpoint):
         """Return Hostname of the given endpoint"""
         
+        logging.info('Hostname request for: %s', str(endpoint))
+
         # This class supports IP addresses only
         if (not isinstance(endpoint, ipaddress.IPv4Address) and
             not isinstance(endpoint, ipaddress.IPv6Address)):
@@ -27,6 +30,7 @@ class HostnamePropertyProvider(BasePropertyProvider):
 
         # Check if device found
         if device is None:
+            logging.info('Device with IP %s not found', endpoint)
             return None
 
         # Return device name and meta of map this name was derived from

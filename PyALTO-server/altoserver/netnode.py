@@ -4,6 +4,7 @@ Representation of network device
 import collections
 import ipaddress
 import time
+import logging
 
 class NetNode(object):
     """NetNode class represents a single network device"""
@@ -75,6 +76,7 @@ class NetNode(object):
         for intf_addr in addr_data:
             ip_intf = ipaddress.ip_interface(intf_addr['address'])
             self._ip_interfaces.append(ip_intf)
+            logging.info('%s : Added interface: %s', self, str(ip_intf))
 
         # Save detailed data for (any) later use
         self._address_details.clear()
