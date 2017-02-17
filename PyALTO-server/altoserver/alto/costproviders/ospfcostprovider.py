@@ -14,7 +14,7 @@ class OSPFCostProvider(BaseCostProvider):
     def __init__(self):
         """Init the object and overwrite type"""
         super().__init__()
-        self.cost_metric = 'routingcost'
+        self.cost_metric = 'ospf-routingcost'
         self.cost_mode = 'numerical'
         self.cost_type = 'ospf-routingcost'
 
@@ -22,7 +22,7 @@ class OSPFCostProvider(BaseCostProvider):
 
     def get_cost(self, in_srcs, in_dsts):
         """Return cost based on OSPF routing cost.
-        srcs and dsts is [ipaddress]
+        srcs and dsts
         """
 
         str_src = '({})'.format(';'.join(map(str, in_srcs)))

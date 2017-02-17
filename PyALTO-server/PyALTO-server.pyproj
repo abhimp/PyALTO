@@ -37,6 +37,9 @@
     <Compile Include="altoserver\alto\addresstypes\ipaddrparser.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="altoserver\alto\costproviders\routehopscostprovider.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="altoserver\alto\costproviders\__init__.py">
       <SubType>Code</SubType>
     </Compile>

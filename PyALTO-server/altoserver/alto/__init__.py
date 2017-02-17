@@ -15,8 +15,13 @@ from .costproviders import *
 from .propertyproviders import *
 
 alto_server = AltoServer()
-alto_server.register_address_parsers([ipaddrparser.IPAddrParser()])
-alto_server.register_cost_providers([ospfcostprovider.OSPFCostProvider()])
+alto_server.register_address_parsers([
+    ipaddrparser.IPAddrParser()
+])
+alto_server.register_cost_providers([
+    ospfcostprovider.OSPFCostProvider(),
+    routehopscostprovider.RouteHopsCostProvider()
+])
 alto_server.register_property_providers([
     pidpropertyprovider.PIDPropertyProvider(),
     hostnamepropertyprovider.HostnamePropertyProvider(),

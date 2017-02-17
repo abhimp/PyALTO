@@ -1,1 +1,1 @@
-__all__ = ['ospfcostprovider']
+__all__ = ['ospfcostprovider','routehopscostprovider']
