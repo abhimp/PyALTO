@@ -6,7 +6,7 @@ import asyncio
 import argparse
 import sys
 import socket
-import ptvsd
+#import ptvsd
 import requests
 import traceback
 
@@ -14,7 +14,7 @@ import nethelpers
 
 # Enable remote execution from the Visual Studio
 # ! Comment out this line if running locally on Win PC!
-ptvsd.enable_attach(secret='alto')
+#ptvsd.enable_attach(secret='alto')
 
 def main(run_args):
     """Main entry point for collector"""

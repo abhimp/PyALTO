@@ -116,7 +116,7 @@ class NetworkMap(object):
         """Create a simple topology for testing"""
 
         # For use by dev machine
-        core = NetNode('core-dev', 'router')
+        core = NetNode('core-0', 'router')
         self._topo.add_node(core)
 
         src = NetNode(
