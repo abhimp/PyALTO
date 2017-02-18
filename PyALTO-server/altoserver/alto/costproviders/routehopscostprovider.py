@@ -138,7 +138,7 @@ class RouteHopsCostProvider(BaseCostProvider):
                 break
             else:
                 # Get the GW router
-                cur_rtr = nm.get_device_by_ip(route_line['gateway'])
+                cur_rtr = nm.get_device_by_ip(ipaddress.ip_address(route_line['gateway']))
                 if cur_rtr is None:
                     logging.warning('Did not find device with IP: %s', route_line['gateway'])
                     return None
