@@ -38,6 +38,15 @@ class NetworkMap(object):
             ipaddress.ip_network('192.168.245.0/24')
         ])
 
+        src = NetNode(
+            'src-0',
+            'user',
+            [ipaddress.ip_interface('192.168.245.2/30')],
+            core.name
+        )
+        self._topo.add_node(src)
+        
+
         global_adslam_index = 0
         homes_per_adslam = 6
 
@@ -98,6 +107,9 @@ class NetworkMap(object):
 
         self._topo.add_edge('bras-2', 'core-0')
         self._topo.add_edge('core-0', 'bras-2')
+
+        self._topo.add_edge('core-0', 'src-0')
+        self._topo.add_edge('src-0', 'core-0')
 
 
     def init_simple_topo(self):
