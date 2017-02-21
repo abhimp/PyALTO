@@ -116,8 +116,16 @@ class NetworkMap(object):
         """Create a simple topology for testing"""
 
         # For use by dev machine
-        core = NetNode('core-dev', 'router')
+        core = NetNode('core-0', 'router')
         self._topo.add_node(core)
+
+        src = NetNode(
+            'src-0',
+            'user',
+            [ipaddress.ip_interface('192.168.245.2/30')],
+            core.name
+        )
+        self._topo.add_node(src)
 
         # ADSLAM user's IPs are:
         # 192.168.<ADSLAM_ID>.<USER_ID+2>/24 (USER_ID=1 reserved for router)
@@ -189,6 +197,15 @@ class NetworkMap(object):
 
         self._topo.add_edge('bras-4', 'bras-5')
         self._topo.add_edge('bras-5', 'bras-4')
+
+        self._topo.add_edge('bras-0', 'core-0')
+        self._topo.add_edge('core-0', 'bras-0')
+
+        self._topo.add_edge('bras-5', 'core-0')
+        self._topo.add_edge('core-0', 'bras-5')
+
+        self._topo.add_edge('src-0', 'core-0')
+        self._topo.add_edge('core-0', 'src-0')
 
         # Update version id once change is done
         self._topo_version += 1
