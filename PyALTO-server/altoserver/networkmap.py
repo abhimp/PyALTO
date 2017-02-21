@@ -276,6 +276,20 @@ class NetworkMap(object):
         # none found
         return None
 
+    def get_upstream_router(self, device_name):
+        """Returns first-hop upstream router. If given
+        device is router - returns device_name.
+        """
+
+        device = self.get_device_by_name(device_name)
+
+        if device is None:
+            return None
+        elif device.type == 'router':
+            return device.name
+        else:
+            return self.get_upstream_router(device.name)
+
 class AltoPID(object):
     """Class representing a single ALTO PID per [RFC7285] §5.1"""
 

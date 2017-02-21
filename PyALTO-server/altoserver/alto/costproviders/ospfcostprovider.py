@@ -50,7 +50,7 @@ class OSPFCostProvider(BaseCostProvider):
                 continue
 
             # Find first hop router
-            first_hop_rtr = self._get_upstream_router(device.name)
+            first_hop_rtr = nm.get_upstream_router(device.name)
 
             # Nothing found
             if first_hop_rtr is None:
@@ -76,18 +76,6 @@ class OSPFCostProvider(BaseCostProvider):
 
         # Resulting cost-map
         return costmap
-
-    def _get_upstream_router(self, device_name):
-        """Given the device name find first hop router"""
-
-        device = nm.get_device_by_name(device_name)
-
-        if device is None:
-            return None
-        elif device.type == 'router':
-            return device.name
-        else:
-            return self._get_upstream_router(device.upstream)
 
     def _get_ospf_rd(self, router_name, destination):
         """Given router name, ger OSPF RD for each destination"""
