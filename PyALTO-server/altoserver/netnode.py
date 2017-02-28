@@ -107,6 +107,106 @@ class NetNode(object):
         assert self.type == 'router'
         self._qrt = qrt_data
 
+    def get_adapter_tx_load(self, adapter_name: str) -> int:
+        """Get TX load in bps of given adapter"""
+        
+        # Do we have any measurements?
+        num_samples = len(self._adapter_stats)
+        if num_samples < 2:
+            return None
+
+        (time_1, stats_1) = self._adapter_stats[-1]
+        (time_2, stats_2) = self._adapter_stats[-2]
+        
+        adapter_stat_1 = None
+        adapter_stat_2 = None
+
+        for adapter_stat in stats_1:
+            if adapter_stat['name'] == adapter_name:
+                adapter_stat_1 = adapter_stat['stats']
+
+        for adapter_stat in stats_2:
+            if adapter_stat['name'] == adapter_name:
+                adapter_stat_2 = adapter_stat['stats']
+
+        if adapter_stat_1 is None or adapter_stat_2 is None:
+            logging.warning('Did not find adapter %s in node %s', adapter_name, self.name)
+            return None
+
+        # x_1 > x_2
+        delta_t = time_1 - time_2
+        delta_d = (adapter_stat_1['tx_bytes'] - adapter_stat_2['tx_bytes']) * 8
+
+        assert delta_t != 0
+
+        return delta_d/delta_t
+
+    def get_adapter_rx_load(self, adapter: str) -> int:
+        """Get RX load in bps of given adapter"""
+        
+        # Do we have any measurements?
+        num_samples = len(self._adapter_stats)
+        if num_samples < 2:
+            return None
+
+        (time_1, stats_1) = self._adapter_stats[-1]
+        (time_2, stats_2) = self._adapter_stats[-2]
+        
+        adapter_stat_1 = None
+        adapter_stat_2 = None
+
+        for adapter_stat in stats_1:
+            if adapter_stat['name'] == adapter_name:
+                adapter_stat_1 = adapter_stat['stats']
+
+        for adapter_stat in stats_2:
+            if adapter_stat['name'] == adapter_name:
+                adapter_stat_2 = adapter_stat['stats']
+
+        if adapter_stat_1 is None or adapter_stat_2 is None:
+            logging.warning('Did not find adapter %s in node %s', adapter_name, self.name)
+            return None
+
+        # x_1 > x_2
+        delta_t = time_1 - time_2
+        delta_d = (adapter_stat_1['rx_bytes'] - adapter_stat_2['rx_bytes']) * 8
+
+        assert delta_t != 0
+
+        return int(delta_d/delta_t)
+
+    def rt_longest_prefix_match(self, destination_ip, return_default=False):
+        """Perform LPM based on destination and return (intf, gw) 
+        or None. use_default allow default route to be returned
+        (if present)."""
+
+        assert self._type == 'router'
+
+        # Match route lines
+        # TODO: change from str interpolation to ctor with (str,str) in Py3.6
+        rt_lines = [line for line in self._rt 
+                    if destination_ip in ipaddress.ip_network('{}/{}'.format(
+                        line['destination'], line['mask']))]
+        
+        if any(rt_lines):
+            lpm_line = max(rt_lines, key=lambda x: 
+                           ipaddress
+                            .ip_network('{}/{}'.format(
+                                x['destination'], x['mask']))
+                            .prefixlen)
+
+            return (lpm_line['intf'], lpm_line['gateway'])
+        elif not return_default:
+            # Do not return default 
+            return none
+        else:
+            # Try to return default
+            def_route = [rt_line for rt_line in self._rt if 'G' in rt_line['flags']]
+            if any(def_route):
+                return def_route[0]
+            else:
+                return None
+
     def __eq__(self, other):
         """Implement equality comparer"""
         

@@ -17,8 +17,8 @@ app.register_blueprint(netupload, url_prefix='/upload')
 app.register_blueprint(alto, url_prefix='/alto')
 
 # Initialize a simple topology
-nm.init_simple_topo()
-#nm.init_small_topo()
+#nm.init_simple_topo()
+nm.init_small_topo()
 
 # Start functioning
 if __name__ == '__main__':
