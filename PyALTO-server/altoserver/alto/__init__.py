@@ -20,7 +20,8 @@ alto_server.register_address_parsers([
 ])
 alto_server.register_cost_providers([
     ospfcostprovider.OSPFCostProvider(),
-    routehopscostprovider.RouteHopsCostProvider()
+    routehopscostprovider.RouteHopsCostProvider(),
+    pathhopscostprovider.PathHopsCostProvider()
 ])
 alto_server.register_property_providers([
     pidpropertyprovider.PIDPropertyProvider(),

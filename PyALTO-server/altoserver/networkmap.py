@@ -358,7 +358,7 @@ class NetworkMap(object):
                 if going_up:
                     # If going up - look for upstream
                     upst_dev = self.get_device_by_name(cur_device.upstream)
-                    if dev_name is None:
+                    if upst_dev is None:
                         raise LookupError('Failed to lookup upstream for device {}. Upstream: {}'
                                       .format(cur_device.name, cur_device.upstream))
                     yield upst_dev
@@ -367,7 +367,7 @@ class NetworkMap(object):
                         raise StopIteration
                     else:
                         cur_device = upst_dev
-                else:
+                else: # Going down
                     if cur_device == device_b:
                         yield cur_device
                         raise StopIteration
@@ -379,7 +379,7 @@ class NetworkMap(object):
                 if going_up:
                     # If going up - look for upstream
                     upst_dev = self.get_device_by_name(cur_device.upstream)
-                    if dev_name is None:
+                    if upst_dev is None:
                         raise LookupError('Failed to lookup upstream for device {}. Upstream: {}'
                                       .format(cur_device.name, cur_device.upstream))
                     yield upst_dev

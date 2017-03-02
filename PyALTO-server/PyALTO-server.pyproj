@@ -57,6 +57,9 @@
     <Compile Include="altoserver\alto\propertyproviders\hostnamepropertyprovider.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="altoserver\alto\costproviders\pathhopscostprovider.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="altoserver\alto\propertyproviders\pidpropertyprovider.py">
       <SubType>Code</SubType>
     </Compile>

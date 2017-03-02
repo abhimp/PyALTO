@@ -181,6 +181,8 @@ class NetNode(object):
         (if present)."""
 
         assert self._type == 'router'
+        if self._rt is None:
+            return None
 
         # Match route lines
         # TODO: change from str interpolation to ctor with (str,str) in Py3.6
@@ -198,7 +200,7 @@ class NetNode(object):
             return (lpm_line['intf'], lpm_line['gateway'])
         elif not return_default:
             # Do not return default 
-            return none
+            return None
         else:
             # Try to return default
             def_route = [rt_line for rt_line in self._rt if 'G' in rt_line['flags']]
