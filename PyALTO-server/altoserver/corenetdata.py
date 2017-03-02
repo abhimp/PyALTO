@@ -93,27 +93,32 @@ class CoreNetData(object):
         
         # Get all source device adapters
         src_node_adapters = self._mappings.get(src_name)
-        if node_adapters is None:
+        if src_node_adapters is None:
             # no such device
+            logging.warning('get_remote_peer(): Device %s not found', src_name)
             return None
 
         # Iterate over adapters finding remote connections
         for (glob_name, loc_name) in src_node_adapters:
             if loc_name != src_loc_intf:
                 continue
+            
+            #logging.info('get_remote_peer(): node: %s local: %s global: %s',
+            #        src_name, src_loc_intf, glob_name)
 
             remote_global = self._get_peer_adapter(glob_name)
             if remote_global is None:
+                logging.warning('get_remote_peer(): Remote global not found!')
                 continue
 
-            remote_hostname = self._get_device_from_globname(remote_global)
-            if remote_hostname is None:
+            remote_data = self._get_device_from_globname(remote_global)
+            if remote_data is None:
+                logging.warning('get_remote_peer(): Remote not found. Remote global: %s', remote_global)
                 continue
 
-            remote_local = self.get_nodes_local_name(remote_hostname, remote_global)
+            return remote_data
 
-            return (remote_hostname, remote_local)
-
+        logging.warning('get_remote_peer(): No conenction found to %s adapter %s', src_name, src_loc_intf)
         return None
 
     def _get_peer_adapter(self, glob_adapter):
@@ -132,7 +137,7 @@ class CoreNetData(object):
     def _get_device_from_globname(self, in_globname):
         """Get device hostname from global adapter name"""
 
-        for hostname, adapters in self._mappings:
+        for hostname, adapters in self._mappings.items():
             for (glob_name, loc_name) in adapters:
                 if glob_name == in_globname:
                     return (hostname, loc_name)

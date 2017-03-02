@@ -3,6 +3,7 @@ Classes related to network topology capture and representation.
 """
 import ipaddress
 import hashlib
+import logging
 
 from networkx import nx
 from altoserver.netnode import NetNode
@@ -27,7 +28,8 @@ class NetworkMap(object):
         self._topo_version = 0          # Each topology change should change the version number
         
         self.core_data = CoreNetData()
-        self.core_data.load_data(r'C:\PyPPSPP\netdata.json')
+        self.core_data.load_data(r'/tmp/netdata.json')
+        #self.core_data.load_data(r'C:\PyPPSPP\netdata.json')
 
     def get_out_edges(self, node):
         """Get node's out edges list"""
@@ -315,15 +317,18 @@ class NetworkMap(object):
         """Returns first-hop upstream router. If given
         device is router - returns device_name.
         """
-
+        
+        device = None
         device = self.get_device_by_name(device_name)
-
+        
         if device is None:
             return None
         elif device.type == 'router':
             return device.name
+        #elif device.type == 'user':
+        #    raise AssertionError('Upstream of {} is user: {}'.format(device_name, device))
         else:
-            return self.get_upstream_router(device.name)
+            return self.get_upstream_router(device.upstream)
 
     def dev_to_dev_iterator(self, ip_a, ip_b):
         """Get iterator returning all intermediate devices in the path

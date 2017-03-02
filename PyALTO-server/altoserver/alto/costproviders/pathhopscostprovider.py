@@ -40,12 +40,12 @@ class PathHopsCostProvider(BaseCostProvider):
 
         path = {}
 
-        try:
-            for index, node in enumerate(nm.dev_to_dev_iterator(srcs[0], dsts[0])):
-                path[index] = node.name
-        except LookupError as exc:
-            logging.warning('Lookup error while tracing: {}'.format(exc))
-            return {}
+        #try:
+        for index, node in enumerate(nm.dev_to_dev_iterator(srcs[0], dsts[0])):
+            path[index] = node.name
+        #except LookupError as exc:
+        #    logging.warning('Lookup error while tracing: {}'.format(str(exc)))
+        #    return {}
 
         data = {
             'source-address': self._ip_parser.from_object(srcs[0]),

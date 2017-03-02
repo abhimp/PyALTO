@@ -189,7 +189,7 @@ class NetNode(object):
         rt_lines = [line for line in self._rt 
                     if destination_ip in ipaddress.ip_network('{}/{}'.format(
                         line['destination'], line['mask']))]
-        
+       
         if any(rt_lines):
             lpm_line = max(rt_lines, key=lambda x: 
                            ipaddress
@@ -197,7 +197,7 @@ class NetNode(object):
                                 x['destination'], x['mask']))
                             .prefixlen)
 
-            return (lpm_line['intf'], lpm_line['gateway'])
+            return (lpm_line['ifname'], lpm_line['gateway'])
         elif not return_default:
             # Do not return default 
             return None
