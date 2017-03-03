@@ -39,6 +39,7 @@ class PathLoadCostProvider(BaseCostProvider):
         idx_node_a = 0
         idx_node_b = 1
         pairs_left = len(path) - 1
+        debug_str = ""
 
         while pairs_left:
             node_a = path[idx_node_a]
@@ -71,28 +72,35 @@ class PathLoadCostProvider(BaseCostProvider):
 
             ((node_a_global, node_a_local), (node_b_global, node_b_local)) = adapters
 
+            load = None
+            rbw = None
+
             # Get RX BW on node_b of TX BW on node_a
             if node_b.type == 'user':
                 # Get upload from dev A
-                load_to_b = node_a.get_adapter_tx_load(node_a_local)
-                if load_to_b is None:
-                    residual_bws.append(cap_a_to_b)
+                load = node_a.get_adapter_tx_load(node_a_local)
+                if load is None:
+                    rbw = cap_a_to_b
                 else:
-                    residual_bws.append(max([0, cap_a_to_b - load_to_b]))
+                    rbw = max([0, cap_a_to_b - load_to_b])
             else:
                 # Get download from dev B
-                load_from_a = node_b.get_adapter_rx_load(node_b_local)
-                if load_from_a is None:
-                    residual_bws.append(cap_a_to_b)
+                load = node_b.get_adapter_rx_load(node_b_local)
+                if load is None:
+                    rbw = cap_a_to_b
                 else:
-                    residual_bws.append(max([0, cap_a_to_b - load_from_a]))
+                    rbw = max([0, cap_a_to_b - load_from_a])
+
+            residual_bws.append(rbw)
+            ';'.join(debug_str, '{} -> {} Cap/Load/RBW {}/{}/{}'
+                     .format(node_a.name, node_b.name, cap_a_to_b, load, rbw))
 
             # Continue on the path
             idx_node_a += 1
             idx_node_b += 1
             pairs_left -= 1
 
-        logging.info('Residual BWs: %s', residual_bws)
+        logging.info(debug_str)
         return min(residual_bws)
 
     def __init__(self):
