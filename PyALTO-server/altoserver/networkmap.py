@@ -12,12 +12,7 @@ from altoserver.corenetdata import CoreNetData
 class NetworkMap(object):
     """Holder of network topology"""
 
-    cap = {
-        'homelink': 50000,
-        'adslamlink': 600000,
-        'bnglink': 100000,
-        'servlink': 1000000
-    }
+    cap = {}
 
     def __init__(self):
         """Initialize the network topology"""
@@ -52,6 +47,14 @@ class NetworkMap(object):
 
     def init_small_topo(self):
         """Create a simple small topology"""
+
+        self.cap = {
+            'homelink': 10000000,
+            'adslamlink': 30000000,
+            'bnglink': 100000000,
+            'servlink': 100000000
+        }
+
         core = NetNode('core-0', 'router')
         self._topo.add_node(core)
         self.add_pid_to_topology('core-dc', [
