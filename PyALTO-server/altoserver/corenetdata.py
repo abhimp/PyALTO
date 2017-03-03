@@ -68,8 +68,9 @@ class CoreNetData(object):
         
         # Get all source device adapters
         src_node_adapters = self._mappings.get(src_device)
-        if node_adapters is None:
+        if src_node_adapters is None:
             # no such device
+            logging.warning('corenetdata::get_adapter_names(): Node %s has no adapters', src_device)
             return None
 
         # Iterate over adapters finding remote connections
@@ -89,6 +90,8 @@ class CoreNetData(object):
 
             return ((glob_name, loc_name), (remote_global, remote_local))
 
+        logging.warning('corenetdata::get_adapter_names(): Node %s has no connectiosn to %s',
+                        src_device, dst_device)
         return None
 
     def get_remote_peer(self, src_name, src_loc_intf):
