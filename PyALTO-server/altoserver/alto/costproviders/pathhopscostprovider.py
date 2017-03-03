@@ -2,9 +2,10 @@
 Network path property provider returns hostnames of all nodes
 in between two given IP addresses.
 
+N.B. This is debug tool and not a cost provider per se!
+
 N.B. This would fail STRICT RFC validation due to return value format!
 """
-import ipaddress
 import logging
 
 from altoserver import nm
@@ -12,7 +13,7 @@ from .basecostprovider import BaseCostProvider
 from ..addresstypes.ipaddrparser import IPAddrParser
 
 class PathHopsCostProvider(BaseCostProvider):
-    """Implements path provider"""
+    """Implements path tracer"""
 
     def __init__(self):
         super().__init__()
@@ -24,7 +25,7 @@ class PathHopsCostProvider(BaseCostProvider):
 
     def get_cost(self, in_srcs, in_dsts):
         """Return path from source to destination"""
-        
+
         str_src = '({})'.format(';'.join(map(str, in_srcs)))
         str_dst = '({})'.format(';'.join(map(str, in_dsts)))
         logging.info('Path trace request: From: %s To: %s', str_src, str_dst)
@@ -40,12 +41,8 @@ class PathHopsCostProvider(BaseCostProvider):
 
         path = {}
 
-        #try:
         for index, node in enumerate(nm.dev_to_dev_iterator(srcs[0], dsts[0])):
             path[index] = node.name
-        #except LookupError as exc:
-        #    logging.warning('Lookup error while tracing: {}'.format(str(exc)))
-        #    return {}
 
         data = {
             'source-address': self._ip_parser.from_object(srcs[0]),
