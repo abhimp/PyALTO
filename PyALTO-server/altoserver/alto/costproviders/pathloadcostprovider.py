@@ -39,7 +39,7 @@ class PathLoadCostProvider(BaseCostProvider):
         idx_node_a = 0
         idx_node_b = 1
         pairs_left = len(path) - 1
-        debug_str = ""
+        debug_str = ''
 
         while pairs_left:
             node_a = path[idx_node_a]
@@ -82,14 +82,14 @@ class PathLoadCostProvider(BaseCostProvider):
                 if load is None:
                     rbw = cap_a_to_b
                 else:
-                    rbw = max([0, cap_a_to_b - load_to_b])
+                    rbw = max([0, cap_a_to_b - load])
             else:
                 # Get download from dev B
                 load = node_b.get_adapter_rx_load(node_b_local)
                 if load is None:
                     rbw = cap_a_to_b
                 else:
-                    rbw = max([0, cap_a_to_b - load_from_a])
+                    rbw = max([0, cap_a_to_b - load])
 
             residual_bws.append(rbw)
             ';'.join(debug_str, '{} -> {} Cap/Load/RBW {}/{}/{}'
