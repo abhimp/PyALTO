@@ -92,8 +92,11 @@ class PathLoadCostProvider(BaseCostProvider):
                     rbw = max([0, cap_a_to_b - load])
 
             residual_bws.append(rbw)
-            ';'.join(debug_str, '{} -> {} Cap/Load/RBW {}/{}/{}'
-                     .format(node_a.name, node_b.name, cap_a_to_b, load, rbw))
+            debug_str = ';'.join([
+                debug_str, 
+                '{} -> {} Cap/Load/RBW {}/{}/{}'
+                .format(node_a.name, node_b.name, cap_a_to_b, load, rbw)
+            ])
 
             # Continue on the path
             idx_node_a += 1
