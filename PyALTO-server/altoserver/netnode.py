@@ -156,11 +156,11 @@ class NetNode(object):
         adapter_stat_2 = None
 
         for adapter_stat in stats_1:
-            if adapter_stat['name'] == adapter_name:
+            if adapter_stat['name'] == adapter:
                 adapter_stat_1 = adapter_stat['stats']
 
         for adapter_stat in stats_2:
-            if adapter_stat['name'] == adapter_name:
+            if adapter_stat['name'] == adapter:
                 adapter_stat_2 = adapter_stat['stats']
 
         if adapter_stat_1 is None or adapter_stat_2 is None:

@@ -3,6 +3,7 @@
 from __future__ import print_function
 import os
 import json
+import re
 
 def get_connections():
     """Build bridged network topology"""
@@ -21,8 +22,11 @@ def get_names():
     rundir = None
     adapters = {}
 
+    regex = re.compile('pycore\.[0-9]$')
+
     for dirname in os.listdir('/tmp'):
-        if dirname.startswith('pycore'):
+        # Scripts have pycore.X while GUI has pycore.XXXX
+        if regex.match(dirname):
             rundir = dirname
             break
 

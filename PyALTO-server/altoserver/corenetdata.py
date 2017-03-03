@@ -77,9 +77,17 @@ class CoreNetData(object):
         for (glob_name, loc_name) in src_node_adapters:
             remote_global = self._get_peer_adapter(glob_name)
             if remote_global is None:
+                logging.warning('corenetdata::get_adapter_names(): Node %s Global %s is not connected!',
+                        src_device, remote_global)
                 continue
 
-            remote_hostname = self._get_device_from_globname(remote_global)
+            remote_data = self._get_device_from_globname(remote_global)
+            if remote_data is None:
+                logging.warning('corenetdata::get_adapter_names(): Failed to get of global %s', remote_global)
+                continue
+            
+            (remote_hostname, remote_local) = remote_data
+
             if remote_hostname is None:
                 continue
 
