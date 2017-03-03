@@ -11,6 +11,9 @@ class CoreNetData(object):
     _mappings = {}
     valid = False
 
+    # _bridges = { bridge_name -> [global_a, global_b]}
+    # _mappings = { hostname -> [[global, local], ...]}
+
     def load_data(self, filename):
         """Load data from given filename"""
         
@@ -22,6 +25,7 @@ class CoreNetData(object):
         self._bridges = data['links']
         self._mappings = data['names']
 
+        self._validate()
         self.valid = True
 
     def get_nodes_global_name(self, node_name, adapter_name):
@@ -142,3 +146,27 @@ class CoreNetData(object):
                 if glob_name == in_globname:
                     return (hostname, loc_name)
         return None
+
+    def _validate(self):
+        """CORE should not have any dangling (not-connected) adapters"""
+
+        # Iterate over all bridges and ensure that we can find all hostnames
+        for bridge, adapters in self._bridges.items():
+
+            # Every bridge should have adapters            
+            if not any(adapters):
+                logging.error('coredata::_validate(): %s bridge has no adapters!', bridge)
+                return
+
+            (global_a, global_b) = adapters
+
+            node_a = self._get_device_from_globname(global_a)
+            node_b = self._get_device_from_globname(global_b)
+
+            if node_a is None:
+                logging.error('coredata::_validate(): No host having global adapter %s', global_a)
+                return
+
+            if node_b is None:
+                logging.error('coredata::_validate(): No host having global adapter %s', global_b)
+                return
