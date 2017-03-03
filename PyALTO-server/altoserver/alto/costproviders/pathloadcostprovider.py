@@ -82,6 +82,7 @@ class PathLoadCostProvider(BaseCostProvider):
                 if load is None:
                     rbw = cap_a_to_b
                 else:
+                    load = int(load)
                     rbw = max([0, cap_a_to_b - load])
             else:
                 # Get download from dev B
@@ -89,6 +90,7 @@ class PathLoadCostProvider(BaseCostProvider):
                 if load is None:
                     rbw = cap_a_to_b
                 else:
+                    load = int(load)
                     rbw = max([0, cap_a_to_b - load])
 
             residual_bws.append(rbw)
