@@ -7,6 +7,8 @@ from .baseaddrtypeparser import BaseAddrTypeParser
 class IPAddrParser(BaseAddrTypeParser):
     """concrete IP address parser implementation"""
 
+    #TODO: Make class method, this object has no state
+
     def __init__(self):
         super().__init__()
         self.identifiers.extend(['ipv4', 'ipv6'])
