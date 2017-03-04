@@ -138,6 +138,13 @@ class NetworkMap(object):
     def init_simple_topo(self):
         """Create a simple topology for testing"""
 
+        self.cap = {
+            'homelink': 10000000,
+            'adslamlink': 30000000,
+            'bnglink': 100000000,
+            'servlink': 100000000
+        }
+
         # For use by dev machine
         core = NetNode('core-0', 'router')
         self._topo.add_node(core)
