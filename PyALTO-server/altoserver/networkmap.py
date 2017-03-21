@@ -159,7 +159,7 @@ class NetworkMap(object):
 
         # ADSLAM user's IPs are:
         # 192.168.<ADSLAM_ID>.<USER_ID+2>/24 (USER_ID=1 reserved for router)
-        num_bras = 6
+        num_bras = 8
         adslams_per_bras = 2
         homes_per_adslam = 6
 
@@ -183,8 +183,8 @@ class NetworkMap(object):
                 # Add ADSLAM Object
                 adslam = NetNode(adslam_name, 'adslam', [], bras_name)
                 self._topo.add_node(adslam)
-                self._topo.add_edge(adslam, bras)
-                self._topo.add_edge(bras, adslam)
+                self._topo.add_edge(adslam, bras, capacity=self.cap['adslamlink'])
+                self._topo.add_edge(bras, adslam, capacity=self.cap['adslamlink'])
 
                 # Add conencted homes
                 for home_id in range(0, homes_per_adslam+1):
@@ -203,39 +203,45 @@ class NetworkMap(object):
                         adslam_name
                     )
                     self._topo.add_node(home)
-                    self._topo.add_edge(home, adslam)
-                    self._topo.add_edge(adslam, home)
+                    self._topo.add_edge(home, adslam, capacity=self.cap['homelink'])
+                    self._topo.add_edge(adslam, home, capacity=self.cap['homelink'])
 
                 # Add pid representing ADSLAM
                 self.add_pid_to_topology(adslam_name, [adslam_net])
 
         # Interconnect BRASes
-        self._topo.add_edge('bras-0', 'bras-1')
-        self._topo.add_edge('bras-1', 'bras-0')
+        self._topo.add_edge('bras-0', 'bras-1', capacity=self.cap['bnglink'])
+        self._topo.add_edge('bras-1', 'bras-0', capacity=self.cap['bnglink'])
 
-        self._topo.add_edge('bras-1', 'bras-2')
-        self._topo.add_edge('bras-2', 'bras-1')
+        self._topo.add_edge('bras-1', 'bras-2', capacity=self.cap['bnglink'])
+        self._topo.add_edge('bras-2', 'bras-1', capacity=self.cap['bnglink'])
 
-        self._topo.add_edge('bras-0', 'bras-3')
-        self._topo.add_edge('bras-3', 'bras-0')
+        self._topo.add_edge('bras-2', 'bras-3', capacity=self.cap['bnglink'])
+        self._topo.add_edge('bras-3', 'bras-2', capacity=self.cap['bnglink'])
 
-        self._topo.add_edge('bras-2', 'bras-5')
-        self._topo.add_edge('bras-5', 'bras-2')
+        self._topo.add_edge('bras-0', 'bras-4', capacity=self.cap['bnglink'])
+        self._topo.add_edge('bras-4', 'bras-0', capacity=self.cap['bnglink'])
 
-        self._topo.add_edge('bras-3', 'bras-4')
-        self._topo.add_edge('bras-4', 'bras-3')
+        self._topo.add_edge('bras-3', 'bras-7', capacity=self.cap['bnglink'])
+        self._topo.add_edge('bras-7', 'bras-3', capacity=self.cap['bnglink'])
 
-        self._topo.add_edge('bras-4', 'bras-5')
-        self._topo.add_edge('bras-5', 'bras-4')
+        self._topo.add_edge('bras-4', 'bras-5', capacity=self.cap['bnglink'])
+        self._topo.add_edge('bras-5', 'bras-4', capacity=self.cap['bnglink'])
 
-        self._topo.add_edge('bras-0', 'core-0')
-        self._topo.add_edge('core-0', 'bras-0')
+        self._topo.add_edge('bras-5', 'bras-6', capacity=self.cap['bnglink'])
+        self._topo.add_edge('bras-6', 'bras-5', capacity=self.cap['bnglink'])
 
-        self._topo.add_edge('bras-5', 'core-0')
-        self._topo.add_edge('core-0', 'bras-5')
+        self._topo.add_edge('bras-6', 'bras-7', capacity=self.cap['bnglink'])
+        self._topo.add_edge('bras-7', 'bras-6', capacity=self.cap['bnglink'])
 
-        self._topo.add_edge('src-0', 'core-0')
-        self._topo.add_edge('core-0', 'src-0')
+        self._topo.add_edge('bras-0', 'core-0', capacity=self.cap['bnglink'])
+        self._topo.add_edge('core-0', 'bras-0', capacity=self.cap['bnglink'])
+
+        self._topo.add_edge('bras-7', 'core-0', capacity=self.cap['bnglink'])
+        self._topo.add_edge('core-0', 'bras-7', capacity=self.cap['bnglink'])
+
+        self._topo.add_edge('src-0', 'core-0', capacity=self.cap['bnglink'])
+        self._topo.add_edge('core-0', 'src-0', capacity=self.cap['bnglink'])
 
         # Update version id once change is done
         self._topo_version += 1
