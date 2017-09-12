@@ -172,7 +172,7 @@ class NetworkMap(object):
             bras = NetNode(bras_name, 'router')
             self._topo.add_node(bras)
 
-            for adslam_id in range(0, adslams_per_bras+1):
+            for adslam_id in range(0, adslams_per_bras):
                 # Build IP range for ADSLAM
                 this_adslam_id = global_adslam_index
                 global_adslam_index += 1
